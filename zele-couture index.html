@@ -1,0 +1,2813 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ZELE COUTURE – Gestion d'Atelier</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #0f0e0d;
+    --cream: #f7f4ef;
+    --gold: #c9a84c;
+    --gold-light: #e8d08a;
+    --rust: #b5472a;
+    --sage: #4a6741;
+    --muted: #8a8278;
+    --border: #ddd8cf;
+    --surface: #ffffff;
+    --surface-2: #faf8f5;
+    --shadow: rgba(15,14,13,0.08);
+    --radius: 2px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'DM Mono', monospace;
+    background: var(--cream);
+    color: var(--ink);
+    min-height: 100vh;
+    font-size: 13px;
+  }
+
+  /* ── HEADER ── */
+  header {
+    background: var(--ink);
+    color: var(--cream);
+    padding: 0 2.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 64px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    border-bottom: 2px solid var(--gold);
+  }
+
+  .brand {
+    display: flex;
+    align-items: baseline;
+    gap: 0.75rem;
+  }
+
+  .brand-name {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.6rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    color: var(--cream);
+  }
+
+  .brand-tag {
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    color: var(--gold);
+    text-transform: uppercase;
+  }
+
+  .header-meta {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+  }
+
+  .week-badge {
+    background: var(--gold);
+    color: var(--ink);
+    padding: 4px 12px;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    font-weight: 500;
+  }
+
+  .config-btn {
+    background: transparent;
+    border: 1px solid rgba(201,168,76,0.4);
+    color: var(--gold);
+    padding: 6px 14px;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    cursor: pointer;
+    letter-spacing: 0.08em;
+    transition: all 0.2s;
+  }
+
+  .config-btn:hover { background: var(--gold); color: var(--ink); }
+
+  /* ── LAYOUT ── */
+  .layout {
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    min-height: calc(100vh - 64px);
+  }
+
+  /* ── SIDEBAR ── */
+  aside {
+    background: var(--ink);
+    color: var(--cream);
+    padding: 2rem 0;
+    border-right: 1px solid rgba(201,168,76,0.2);
+  }
+
+  .nav-section-label {
+    font-size: 9px;
+    letter-spacing: 0.25em;
+    color: var(--muted);
+    text-transform: uppercase;
+    padding: 0 1.5rem;
+    margin-bottom: 0.5rem;
+    margin-top: 1.5rem;
+  }
+
+  .nav-section-label:first-child { margin-top: 0; }
+
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.65rem 1.5rem;
+    cursor: pointer;
+    font-size: 12px;
+    color: rgba(247,244,239,0.65);
+    letter-spacing: 0.04em;
+    transition: all 0.15s;
+    border-left: 2px solid transparent;
+  }
+
+  .nav-item:hover { color: var(--cream); background: rgba(201,168,76,0.08); }
+  .nav-item.active {
+    color: var(--gold);
+    border-left-color: var(--gold);
+    background: rgba(201,168,76,0.1);
+  }
+
+  .nav-icon { font-size: 14px; width: 18px; text-align: center; }
+
+  .sidebar-stats {
+    margin: 2rem 1.5rem 0;
+    padding: 1rem;
+    border: 1px solid rgba(201,168,76,0.2);
+    background: rgba(201,168,76,0.05);
+  }
+
+  .sidebar-stat-label {
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 0.25rem;
+  }
+
+  .sidebar-stat-value {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.4rem;
+    font-weight: 600;
+    color: var(--gold);
+  }
+
+  /* ── MAIN ── */
+  main {
+    background: var(--cream);
+    overflow-y: auto;
+  }
+
+  .page { display: none; padding: 2.5rem; }
+  .page.active { display: block; }
+
+  .page-header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .page-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 2rem;
+    font-weight: 300;
+    letter-spacing: 0.05em;
+    line-height: 1;
+  }
+
+  .page-subtitle {
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+    margin-top: 4px;
+    text-transform: uppercase;
+  }
+
+  /* ── CARDS ── */
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+
+  .kpi-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 1.25rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .kpi-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: var(--gold);
+  }
+
+  .kpi-card.green::before { background: var(--sage); }
+  .kpi-card.red::before { background: var(--rust); }
+  .kpi-card.blue::before { background: #3a5a8a; }
+
+  .kpi-label {
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 0.5rem;
+  }
+
+  .kpi-value {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.8rem;
+    font-weight: 600;
+    line-height: 1;
+    color: var(--ink);
+  }
+
+  .kpi-sub {
+    font-size: 10px;
+    color: var(--muted);
+    margin-top: 4px;
+  }
+
+  /* ── SECTION ── */
+  .section {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    margin-bottom: 1.5rem;
+  }
+
+  .section-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .section-title {
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    font-weight: 500;
+  }
+
+  /* ── BUTTONS ── */
+  .btn {
+    padding: 7px 16px;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    cursor: pointer;
+    border: none;
+    transition: all 0.15s;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .btn-primary { background: var(--ink); color: var(--cream); }
+  .btn-primary:hover { background: #2a2825; }
+  .btn-gold { background: var(--gold); color: var(--ink); }
+  .btn-gold:hover { background: var(--gold-light); }
+  .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--ink); }
+  .btn-outline:hover { border-color: var(--ink); }
+  .btn-danger { background: var(--rust); color: white; }
+  .btn-success { background: var(--sage); color: white; }
+  .btn-sm { padding: 4px 10px; font-size: 10px; }
+
+  /* ── TABLE ── */
+  .table-wrap { overflow-x: auto; }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+  }
+
+  thead tr { background: var(--surface-2); }
+
+  th {
+    padding: 0.75rem 1rem;
+    text-align: left;
+    font-size: 9px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--muted);
+    font-weight: 500;
+    border-bottom: 1px solid var(--border);
+  }
+
+  td {
+    padding: 0.7rem 1rem;
+    border-bottom: 1px solid rgba(0,0,0,0.04);
+    vertical-align: middle;
+  }
+
+  tbody tr:hover { background: var(--surface-2); }
+  tbody tr:last-child td { border-bottom: none; }
+
+  .badge {
+    display: inline-block;
+    padding: 2px 8px;
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    font-weight: 500;
+  }
+
+  .badge-en-cours { background: rgba(58,90,138,0.12); color: #3a5a8a; }
+  .badge-termine { background: rgba(74,103,65,0.12); color: var(--sage); }
+  .badge-solde { background: rgba(74,103,65,0.12); color: var(--sage); }
+  .badge-partiel { background: rgba(201,168,76,0.15); color: #8a6a1a; }
+
+  .amount { font-family: 'Cormorant Garamond', serif; font-size: 1rem; font-weight: 600; }
+  .amount-positive { color: var(--sage); }
+  .amount-negative { color: var(--rust); }
+  .amount-muted { color: var(--muted); }
+
+  /* ── FORMS ── */
+  .form-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    padding: 1.5rem;
+  }
+
+  .form-grid-2 { grid-template-columns: repeat(2, 1fr); }
+  .form-grid-4 { grid-template-columns: repeat(4, 1fr); }
+
+  .form-group { display: flex; flex-direction: column; gap: 5px; }
+  .form-group.full { grid-column: 1 / -1; }
+
+  label {
+    font-size: 9px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+    font-weight: 500;
+  }
+
+  input, select, textarea {
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    padding: 8px 10px;
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    color: var(--ink);
+    outline: none;
+    transition: border-color 0.15s;
+    border-radius: var(--radius);
+    width: 100%;
+  }
+
+  input:focus, select:focus, textarea:focus {
+    border-color: var(--gold);
+    background: var(--surface);
+  }
+
+  .form-actions {
+    padding: 1rem 1.5rem;
+    border-top: 1px solid var(--border);
+    display: flex;
+    gap: 0.75rem;
+    justify-content: flex-end;
+  }
+
+  /* ── MODAL ── */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(15,14,13,0.7);
+    z-index: 1000;
+    backdrop-filter: blur(2px);
+    align-items: center;
+    justify-content: center;
+  }
+
+  .modal-overlay.open { display: flex; }
+
+  .modal {
+    background: var(--surface);
+    width: 560px;
+    max-width: 95vw;
+    max-height: 90vh;
+    overflow-y: auto;
+    border-top: 3px solid var(--gold);
+    animation: slideUp 0.2s ease;
+  }
+
+  @keyframes slideUp {
+    from { transform: translateY(20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+
+  .modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .modal-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.25rem;
+    font-weight: 600;
+  }
+
+  .modal-close {
+    background: none;
+    border: none;
+    font-size: 18px;
+    cursor: pointer;
+    color: var(--muted);
+    padding: 4px 8px;
+  }
+
+  .modal-close:hover { color: var(--ink); }
+
+  /* ── BILAN ── */
+  .bilan-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    padding: 1.5rem;
+  }
+
+  .bilan-block {
+    border: 1px solid var(--border);
+    padding: 1.25rem;
+  }
+
+  .bilan-block-title {
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .bilan-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.4rem 0;
+    font-size: 12px;
+  }
+
+  .bilan-total {
+    border-top: 1px solid var(--border);
+    padding-top: 0.6rem;
+    margin-top: 0.4rem;
+    font-weight: 500;
+  }
+
+  /* ── CONFIG PANEL ── */
+  .config-panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    border-left: 3px solid var(--gold);
+  }
+
+  .config-title {
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 1rem;
+  }
+
+  .config-input-group {
+    display: flex;
+    gap: 0.75rem;
+    align-items: flex-end;
+  }
+
+  .config-input-group .form-group { flex: 1; }
+
+  /* ── TOASTER ── */
+  #toaster {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .toast {
+    background: var(--ink);
+    color: var(--cream);
+    padding: 0.75rem 1.25rem;
+    font-size: 12px;
+    letter-spacing: 0.04em;
+    border-left: 3px solid var(--gold);
+    animation: toastIn 0.25s ease;
+    max-width: 320px;
+  }
+
+  .toast.success { border-left-color: var(--sage); }
+  .toast.error { border-left-color: var(--rust); }
+
+  @keyframes toastIn {
+    from { transform: translateX(20px); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+  }
+
+  /* ── EMPTY STATE ── */
+  .empty-state {
+    text-align: center;
+    padding: 3rem;
+    color: var(--muted);
+  }
+
+  .empty-state-icon { font-size: 2rem; margin-bottom: 0.75rem; opacity: 0.4; }
+  .empty-state-text { font-size: 12px; letter-spacing: 0.06em; }
+
+  /* ── WEEK PICKER ── */
+  .week-selector {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .week-selector input { width: 180px; }
+
+  /* ── SEARCH ── */
+  .search-bar {
+    position: relative;
+  }
+
+  .search-bar input {
+    padding-left: 30px;
+    width: 220px;
+  }
+
+  .search-bar::before {
+    content: '⌕';
+    position: absolute;
+    left: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--muted);
+    font-size: 14px;
+    pointer-events: none;
+  }
+
+  .filters {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+  }
+
+  /* ── PROGRESS BAR ── */
+  .progress-bar {
+    height: 3px;
+    background: var(--border);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: var(--gold);
+    transition: width 0.3s ease;
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 900px) {
+    .layout { grid-template-columns: 1fr; }
+    aside { display: none; }
+    .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+    .form-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ══════════ ÉCRAN DE CONNEXION ══════════ -->
+<div id="loginScreen" style="position:fixed;inset:0;background:#0f0e0c;display:flex;align-items:center;justify-content:center;z-index:9999;flex-direction:column;gap:1.5rem;">
+  <div style="text-align:center;margin-bottom:0.5rem;">
+    <div style="font-family:Georgia,serif;font-size:2rem;color:#f5f0e8;letter-spacing:0.15em;">ZELE COUTURE</div>
+    <div style="font-size:11px;color:#888;letter-spacing:0.2em;margin-top:4px;">SYSTÈME DE GESTION</div>
+  </div>
+  <div style="background:#1a1915;border:1px solid #333;border-radius:12px;padding:2rem;width:320px;max-width:90vw;">
+    <div style="font-size:12px;color:#888;margin-bottom:1.5rem;text-align:center;">Entrez votre mot de passe</div>
+    <input type="password" id="loginPassword" placeholder="••••••••"
+      style="width:100%;background:#111;border:1px solid #333;color:#f5f0e8;padding:10px 14px;border-radius:6px;font-size:15px;box-sizing:border-box;margin-bottom:0.75rem;"
+      onkeydown="if(event.key==='Enter') doLogin()">
+    <div id="loginError" style="color:#c0392b;font-size:12px;margin-bottom:0.75rem;display:none;text-align:center;">❌ Mot de passe incorrect</div>
+    <button onclick="doLogin()" style="width:100%;background:transparent;border:1px solid #c9a84c;color:#c9a84c;padding:11px;border-radius:6px;font-size:13px;letter-spacing:0.1em;cursor:pointer;">
+      ENTRER
+    </button>
+    <div id="loginRole" style="font-size:10px;color:#555;margin-top:1rem;text-align:center;"></div>
+  </div>
+</div>
+
+<div id="appLayout" style="display:none;">
+
+<!-- HEADER -->
+<header>
+  <div class="brand">
+    <span class="brand-name">ZELE COUTURE</span>
+    <span class="brand-tag">Système de Gestion</span>
+  </div>
+  <div class="header-meta">
+    <span class="week-badge" id="headerWeek">Semaine —</span>
+    <button class="config-btn" id="syncBtn" onclick="syncFromSheets()" style="border-color:rgba(74,103,65,0.5);color:#7aad6e;">⟳ Sync Google Sheets</button>
+    <button class="config-btn" onclick="showPage('config')">⚙ Configuration</button>
+  </div>
+</header>
+
+<!-- LAYOUT -->
+<div class="layout">
+
+  <!-- SIDEBAR -->
+  <aside>
+    <div class="nav-section-label">Vue d'ensemble</div>
+    <div class="nav-item active" onclick="showPage('dashboard')">
+      <span class="nav-icon">◈</span> Dashboard
+    </div>
+
+    <div class="nav-section-label">Gestion</div>
+    <div class="nav-item" onclick="showPage('commandes')">
+      <span class="nav-icon">✦</span> Commandes
+    </div>
+    <div class="nav-item" onclick="showPage('paiements')">
+      <span class="nav-icon">◎</span> Paiements
+    </div>
+    <div class="nav-item" onclick="showPage('interne')">
+      <span class="nav-icon">⊡</span> Gestion Interne
+    </div>
+
+    <div class="nav-section-label">Finance</div>
+    <div class="nav-item" onclick="showPage('salaires')">
+      <span class="nav-icon">⊛</span> Salaires
+    </div>
+    <div class="nav-item" onclick="showPage('bilan')">
+      <span class="nav-icon">◱</span> Bilan Hebdomadaire
+    </div>
+    <div class="nav-item" onclick="showPage('rapports')">
+      <span class="nav-icon">◐</span> Rapports Mensuels
+    </div>
+
+    <div class="nav-section-label">Analyses</div>
+    <div class="nav-item" onclick="showPage('recus')">
+      <span class="nav-icon">🧾</span> Historique Reçus
+    </div>
+    <div class="nav-item" onclick="showPage('tailleurs')">
+      <span class="nav-icon">◉</span> Stats Tailleurs
+    </div>
+
+    <div class="sidebar-stats">
+      <div class="sidebar-stat-label">Bénéfice cette semaine</div>
+      <div class="sidebar-stat-value" id="sidebarBenefice">—</div>
+    </div>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <main>
+
+    <!-- ══════════ DASHBOARD ══════════ -->
+    <div class="page active" id="page-dashboard">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Dashboard</div>
+          <div class="page-subtitle">Vue générale · <span id="currentWeekLabel">Semaine en cours</span></div>
+        </div>
+        <div class="filters">
+          <div class="week-selector">
+            <label style="text-transform:none;font-size:11px;color:var(--muted)">Semaine :</label>
+            <input type="week" id="weekFilter" onchange="refreshDashboard()">
+          </div>
+        </div>
+      </div>
+
+      <div class="kpi-grid">
+        <div class="kpi-card">
+          <div class="kpi-label">Recettes (paiements reçus)</div>
+          <div class="kpi-value amount-positive" id="kpiRecette">0 XAF</div>
+          <div class="kpi-sub" id="kpiRecetteSub">Cette semaine</div>
+        </div>
+        <div class="kpi-card red">
+          <div class="kpi-label">Dépenses totales</div>
+          <div class="kpi-value amount-negative" id="kpiDepenses">0 XAF</div>
+          <div class="kpi-sub">Salaires + Autres</div>
+        </div>
+        <div class="kpi-card green">
+          <div class="kpi-label">Bénéfice net</div>
+          <div class="kpi-value" id="kpiBenefice">0 XAF</div>
+          <div class="kpi-sub">Recettes − Dépenses</div>
+        </div>
+        <div class="kpi-card blue">
+          <div class="kpi-label">Commandes en cours</div>
+          <div class="kpi-value" id="kpiCommandes">0</div>
+          <div class="kpi-sub" id="kpiCommandesSub">Toutes périodes</div>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;">
+        <div class="section">
+          <div class="section-head">
+            <span class="section-title">Dernières commandes</span>
+            <button class="btn btn-outline btn-sm" onclick="showPage('commandes')">Voir tout</button>
+          </div>
+          <div class="table-wrap" id="dashCommandesTable">
+            <div class="empty-state"><div class="empty-state-icon">✦</div><div class="empty-state-text">Aucune commande</div></div>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="section-head">
+            <span class="section-title">Paiements récents</span>
+            <button class="btn btn-outline btn-sm" onclick="showPage('paiements')">Voir tout</button>
+          </div>
+          <div class="table-wrap" id="dashPaiementsTable">
+            <div class="empty-state"><div class="empty-state-icon">◎</div><div class="empty-state-text">Aucun paiement</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════ COMMANDES ══════════ -->
+    <div class="page" id="page-commandes">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Commandes</div>
+          <div class="page-subtitle">Cycle de vie complet des commandes</div>
+        </div>
+        <div class="filters">
+          <div class="search-bar">
+            <input type="text" id="searchCommandes" placeholder="Rechercher client..." oninput="renderCommandes()">
+          </div>
+          <select id="filterStatut" onchange="renderCommandes()" style="width:auto;padding:7px 10px;">
+            <option value="">Tous statuts</option>
+            <option value="En_Cours">En cours</option>
+            <option value="Terminé">Terminé</option>
+          </select>
+          <button class="btn btn-primary" onclick="openModal('modalCommande')">+ Nouvelle commande</button>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Date d'arrivée</th>
+                <th>Client</th>
+                <th>Modèle</th>
+                <th>Prix total</th>
+                <th>Avance</th>
+                <th>Reste</th>
+                <th>Statut</th>
+                <th>Rendez-vous</th>
+                <th>Date couture</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="commandesBody">
+              <tr><td colspan="10"><div class="empty-state"><div class="empty-state-icon">✦</div><div class="empty-state-text">Aucune commande enregistrée</div></div></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════ PAIEMENTS ══════════ -->
+    <div class="page" id="page-paiements">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Paiements</div>
+          <div class="page-subtitle">Flux de trésorerie réel — base de calcul des recettes</div>
+        </div>
+        <button class="btn btn-primary" onclick="openModal('modalPaiement')">+ Enregistrer paiement</button>
+      </div>
+
+      <div class="kpi-grid" style="grid-template-columns:repeat(3,1fr)">
+        <div class="kpi-card green">
+          <div class="kpi-label">Total encaissé (global)</div>
+          <div class="kpi-value amount-positive" id="totalEncaisse">0 XAF</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Nb de paiements</div>
+          <div class="kpi-value" id="nbPaiements">0</div>
+        </div>
+        <div class="kpi-card red">
+          <div class="kpi-label">Reste à encaisser</div>
+          <div class="kpi-value amount-negative" id="resteEncaisser">0 XAF</div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Ref. paiement</th>
+                <th>Command ID</th>
+                <th>Client</th>
+                <th>Date paiement</th>
+                <th>Montant</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="paiementsBody">
+              <tr><td colspan="6"><div class="empty-state"><div class="empty-state-icon">◎</div><div class="empty-state-text">Aucun paiement enregistré</div></div></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════ GESTION INTERNE ══════════ -->
+    <div class="page" id="page-interne">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Gestion Interne</div>
+          <div class="page-subtitle">Dépenses de production — liées à la Date_Couture</div>
+        </div>
+        <button class="btn btn-primary" onclick="openModal('modalInterne')">+ Ajouter dépense</button>
+      </div>
+
+      <div class="section">
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Commande</th>
+                <th>Client / Modèle</th>
+                <th>Date couture</th>
+                <th>Tailleur</th>
+                <th>Semaine</th>
+                <th>Frais tailleur</th>
+                <th>Autres dépenses</th>
+                <th>Total</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="interneBody">
+              <tr><td colspan="7"><div class="empty-state"><div class="empty-state-icon">⊡</div><div class="empty-state-text">Aucune dépense enregistrée</div></div></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════ SALAIRES ══════════ -->
+    <div class="page" id="page-salaires">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Calcul des Salaires</div>
+          <div class="page-subtitle">Payés chaque samedi — basé sur Date_Couture (Dim → Sam)</div>
+        </div>
+        <div class="filters">
+          <div class="week-selector">
+            <input type="week" id="salairesWeek" onchange="renderSalaires()">
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-head">
+          <span class="section-title">Salaires par tailleur</span>
+          <span id="salairesWeekLabel" style="font-size:11px;color:var(--muted);letter-spacing:0.08em;">—</span>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Tailleur</th>
+                <th>Nb commandes cousues</th>
+                <th>Frais tailleur</th>
+                <th>À payer ce samedi</th>
+              </tr>
+            </thead>
+            <tbody id="salairesBody">
+              <tr><td colspan="4"><div class="empty-state"><div class="empty-state-icon">⊛</div><div class="empty-state-text">Sélectionnez une semaine</div></div></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div style="padding:1rem 1.5rem;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;">
+          <span style="font-size:11px;color:var(--muted);">TOTAL À PAYER CETTE SEMAINE</span>
+          <span class="amount amount-negative" id="totalSalaires" style="font-size:1.25rem;">0 XAF</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════ BILAN ══════════ -->
+    <div class="page" id="page-bilan">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Bilan Hebdomadaire</div>
+          <div class="page-subtitle">Archive financière — une ligne par semaine clôturée</div>
+        </div>
+        <button class="btn btn-gold" onclick="ouvrirCloture()">⊛ Clôturer la semaine</button>
+      </div>
+
+      <!-- Bilan semaine en cours -->
+      <div class="section" style="margin-bottom:1.5rem;">
+        <div class="section-head">
+          <span class="section-title">Semaine en cours — Aperçu avant clôture</span>
+          <div class="filters">
+            <div class="week-selector">
+              <input type="week" id="bilanWeek" onchange="renderBilanCourant()">
+            </div>
+          </div>
+        </div>
+        <div class="bilan-grid" id="bilanCourantContent">
+          <div class="bilan-block">
+            <div class="bilan-block-title">Recettes</div>
+            <div class="bilan-row"><span>Paiements reçus</span><span class="amount amount-positive" id="bilanRecette">0 XAF</span></div>
+          </div>
+          <div class="bilan-block">
+            <div class="bilan-block-title">Dépenses</div>
+            <div class="bilan-row"><span>Salaires tailleurs</span><span class="amount" id="bilanSalaires">0 XAF</span></div>
+            <div class="bilan-row"><span>Autres dépenses</span><span class="amount" id="bilanAutres">0 XAF</span></div>
+            <div class="bilan-row bilan-total"><span>Total dépenses</span><span class="amount amount-negative" id="bilanTotalDep">0 XAF</span></div>
+          </div>
+          <div class="bilan-block" style="grid-column:1/-1;background:var(--surface-2);">
+            <div class="bilan-row" style="font-size:1.1rem;">
+              <span style="font-family:'Cormorant Garamond',serif;font-size:1.1rem;">Bénéfice Net</span>
+              <span class="amount" id="bilanBeneficeNet" style="font-size:1.3rem;">0 XAF</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Historique bilans clôturés -->
+      <div class="section">
+        <div class="section-head">
+          <span class="section-title">Historique des bilans clôturés</span>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Semaine</th>
+                <th>Année</th>
+                <th>Recettes</th>
+                <th>Dépenses</th>
+                <th>Bénéfice net</th>
+                <th>Date clôture</th>
+                <th>Export</th>
+              </tr>
+            </thead>
+            <tbody id="bilanHistoryBody">
+              <tr><td colspan="7"><div class="empty-state"><div class="empty-state-icon">◱</div><div class="empty-state-text">Aucun bilan clôturé</div></div></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════ HISTORIQUE REÇUS ══════════ -->
+    <div class="page" id="page-recus">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Historique des Reçus</div>
+          <div class="page-subtitle">Tous les reçus générés — avec liens PDF</div>
+        </div>
+        <div class="filters">
+          <div class="search-bar">
+            <input type="text" id="searchRecus" placeholder="Rechercher client..." oninput="renderRecus()">
+          </div>
+        </div>
+      </div>
+      <div class="kpi-grid" style="grid-template-columns:repeat(3,1fr)">
+        <div class="kpi-card">
+          <div class="kpi-label">Total reçus générés</div>
+          <div class="kpi-value" id="kpiNbRecus">0</div>
+        </div>
+        <div class="kpi-card green">
+          <div class="kpi-label">Montant total reçus</div>
+          <div class="kpi-value amount-positive" id="kpiMontantRecus">0 XAF</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Ce mois-ci</div>
+          <div class="kpi-value" id="kpiRecusMois">0</div>
+        </div>
+      </div>
+      <div class="section">
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>N° Reçu</th>
+                <th>Commande</th>
+                <th>Client</th>
+                <th>Montant</th>
+                <th>Date</th>
+                <th>Type</th>
+                <th>PDF</th>
+              </tr>
+            </thead>
+            <tbody id="recusBody">
+              <tr><td colspan="7"><div class="empty-state"><div class="empty-state-icon">🧾</div><div class="empty-state-text">Aucun reçu généré</div></div></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════ STATS TAILLEURS ══════════ -->
+    <div class="page" id="page-tailleurs">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Statistiques Tailleurs</div>
+          <div class="page-subtitle">Performance et salaires par tailleur</div>
+        </div>
+        <div class="filters">
+          <select id="tailleurAnnee" onchange="renderStatsTailleurs()" style="width:auto;padding:7px 10px;">
+          </select>
+        </div>
+      </div>
+
+      <!-- Cards par tailleur -->
+      <div id="tailleursCards" style="display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem;margin-bottom:1.5rem;"></div>
+
+      <!-- Détail semaine par semaine -->
+      <div class="section">
+        <div class="section-head">
+          <span class="section-title">Détail par semaine</span>
+          <select id="tailleurFilter" onchange="renderStatsTailleurs()" style="width:auto;padding:6px 10px;font-size:11px;">
+            <option value="">Tous les tailleurs</option>
+          </select>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Semaine</th>
+                <th>Tailleur</th>
+                <th>Commandes cousues</th>
+                <th>Frais tailleur</th>
+                <th>Autres dépenses</th>
+                <th>Total semaine</th>
+                <th>Statut paiement</th>
+              </tr>
+            </thead>
+            <tbody id="tailleurDetailBody">
+              <tr><td colspan="7"><div class="empty-state"><div class="empty-state-icon">◉</div><div class="empty-state-text">Aucune donnée</div></div></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════ RAPPORTS MENSUELS ══════════ -->
+    <div class="page" id="page-rapports">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Rapports Mensuels</div>
+          <div class="page-subtitle">Bilan par semaine et par mois</div>
+        </div>
+        <div class="filters">
+          <select id="rapportAnnee" onchange="renderRapports()" style="width:auto;padding:7px 10px;">
+          </select>
+          <select id="rapportMois" onchange="renderRapports()" style="width:auto;padding:7px 10px;">
+            <option value="">Tous les mois</option>
+            <option value="1">Janvier</option>
+            <option value="2">Février</option>
+            <option value="3">Mars</option>
+            <option value="4">Avril</option>
+            <option value="5">Mai</option>
+            <option value="6">Juin</option>
+            <option value="7">Juillet</option>
+            <option value="8">Août</option>
+            <option value="9">Septembre</option>
+            <option value="10">Octobre</option>
+            <option value="11">Novembre</option>
+            <option value="12">Décembre</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- KPIs annuels -->
+      <div class="kpi-grid" style="margin-bottom:1.5rem">
+        <div class="kpi-card green">
+          <div class="kpi-label">Recettes année</div>
+          <div class="kpi-value amount-positive" id="rapportRecetteAnnee">0 XAF</div>
+        </div>
+        <div class="kpi-card red">
+          <div class="kpi-label">Dépenses année</div>
+          <div class="kpi-value amount-negative" id="rapportDepensesAnnee">0 XAF</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Bénéfice année</div>
+          <div class="kpi-value" id="rapportBeneficeAnnee">0 XAF</div>
+        </div>
+        <div class="kpi-card blue">
+          <div class="kpi-label">Meilleur mois</div>
+          <div class="kpi-value" id="rapportMeilleurMois" style="font-size:1.1rem">—</div>
+        </div>
+      </div>
+
+      <!-- Tableau mensuel -->
+      <div class="section" style="margin-bottom:1.5rem">
+        <div class="section-head">
+          <span class="section-title">Bilan par mois</span>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Mois</th>
+                <th>Recettes</th>
+                <th>Dépenses</th>
+                <th>Bénéfice net</th>
+                <th>Nb semaines</th>
+                <th>Tendance</th>
+              </tr>
+            </thead>
+            <tbody id="rapportMoisBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Tableau détail par semaine -->
+      <div class="section">
+        <div class="section-head">
+          <span class="section-title">Détail par semaine</span>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Semaine</th>
+                <th>Mois</th>
+                <th>Recettes</th>
+                <th>Salaires</th>
+                <th>Autres dépenses</th>
+                <th>Bénéfice net</th>
+                <th>Date clôture</th>
+              </tr>
+            </thead>
+            <tbody id="rapportSemaineBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════ CONFIG ══════════ -->
+    <div class="page" id="page-config">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Configuration</div>
+          <div class="page-subtitle">Connexion Google Sheets & paramètres</div>
+        </div>
+      </div>
+
+      <div class="config-panel">
+        <div class="config-title">🔗 URL du Web App Google Apps Script déployé</div>
+        <div class="config-input-group">
+          <div class="form-group" style="flex:1">
+            <label>Script URL</label>
+            <input type="url" id="configScriptUrl" placeholder="https://script.google.com/macros/s/AKfyc.../exec">
+          </div>
+          <button class="btn btn-gold" onclick="saveConfig()">Enregistrer</button>
+          <button class="btn btn-outline" onclick="testConnection()">Tester connexion</button>
+        </div>
+        <p style="margin-top:0.75rem;font-size:11px;color:var(--muted);">
+          Déployez le fichier <code style="background:var(--surface-2);padding:1px 5px;">Code.gs</code> fourni dans Google Apps Script. Copiez l'URL du déploiement ici. Sans URL configurée, l'application fonctionne en mode démo (localStorage).
+        </p>
+      </div>
+
+      <div class="config-panel" style="border-left-color:var(--sage);">
+        <div class="config-title">🔧 Gestion des données locales</div>
+        <div style="display:flex;gap:0.75rem;margin-top:0.5rem;flex-wrap:wrap;">
+          <button class="btn btn-outline" onclick="exportData()">⬇ Exporter JSON</button>
+          <button class="btn btn-outline" onclick="document.getElementById('importFile').click()">⬆ Importer JSON</button>
+          <input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(event)">
+          <button class="btn btn-danger" onclick="clearAllData()">✕ Effacer toutes les données</button>
+        </div>
+      </div>
+
+      <div class="config-panel" style="border-left-color:#3a5a8a;">
+        <div class="config-title">📋 Instructions de déploiement</div>
+        <ol style="line-height:2;font-size:12px;color:var(--muted);padding-left:1.2rem;">
+          <li>Créez un Google Sheet avec 4 feuilles : <strong>COMMANDES</strong>, <strong>PAIEMENTS</strong>, <strong>GESTION_INTERNE</strong>, <strong>BILAN_HEBDOMADAIRE</strong></li>
+          <li>Ouvrez Google Apps Script (Extensions → Apps Script)</li>
+          <li>Copiez le contenu du fichier <strong>Code.gs</strong> fourni</li>
+          <li>Mettez à jour le <strong>SPREADSHEET_ID</strong> dans le script</li>
+          <li>Déployez en tant qu'application Web (Déployer → Nouveau déploiement)</li>
+          <li>Copiez l'URL et collez-la ci-dessus</li>
+        </ol>
+      </div>
+    </div>
+
+  </main>
+</div>
+</div><!-- end appLayout -->
+
+<!-- ══════════ MODALS ══════════ -->
+
+<!-- Modal Commande -->
+<div class="modal-overlay" id="modalCommande">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title" id="modalCommandeTitle">Nouvelle Commande</span>
+      <button class="modal-close" onclick="closeModal('modalCommande')">×</button>
+    </div>
+    <div class="form-grid">
+      <input type="hidden" id="cmdEditId">
+      <div class="form-group">
+        <label>Date d'arrivée *</label>
+        <input type="date" id="cmdDateArrivee">
+      </div>
+      <div class="form-group">
+        <label>Nom du client *</label>
+        <input type="text" id="cmdNomClient" placeholder="Ex: Aminata Diallo">
+      </div>
+      <div class="form-group">
+        <label>Modèle / Description *</label>
+        <input type="text" id="cmdModele" placeholder="Ex: Robe de soirée">
+      </div>
+      <div class="form-group">
+        <label>Prix total (XAF) *</label>
+        <input type="number" id="cmdPrixTotal" placeholder="0" min="0">
+      </div>
+      <div class="form-group">
+        <label>Avance reçue (XAF)</label>
+        <input type="number" id="cmdAvance" placeholder="0" min="0" value="0">
+      </div>
+      <div class="form-group">
+        <label>Statut</label>
+        <select id="cmdStatut">
+          <option value="En_Cours">En cours</option>
+          <option value="Terminé">Terminé</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Rendez-vous (date livraison) *</label>
+        <input type="date" id="cmdRendezVous">
+      </div>
+      <div class="form-group">
+        <label>Date couture (si terminé)</label>
+        <input type="date" id="cmdDateCouture">
+      </div>
+    </div>
+    <div class="form-actions">
+      <button class="btn btn-outline" onclick="closeModal('modalCommande')">Annuler</button>
+      <button class="btn btn-primary" onclick="saveCommande()">Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Paiement -->
+<div class="modal-overlay" id="modalPaiement">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">Enregistrer un Paiement</span>
+      <button class="modal-close" onclick="closeModal('modalPaiement')">×</button>
+    </div>
+    <div class="form-grid form-grid-2">
+      <div class="form-group">
+        <label>Commande associée *</label>
+        <select id="payCommandeId">
+          <option value="">— Sélectionner —</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Date de paiement *</label>
+        <input type="date" id="payDate">
+      </div>
+      <div class="form-group">
+        <label>Montant reçu (XAF) *</label>
+        <input type="number" id="payMontant" placeholder="0" min="0">
+      </div>
+      <div class="form-group">
+        <label>Note (optionnel)</label>
+        <input type="text" id="payNote" placeholder="Ex: solde complet">
+      </div>
+    </div>
+    <div class="form-actions">
+      <button class="btn btn-outline" onclick="closeModal('modalPaiement')">Annuler</button>
+      <button class="btn btn-success" onclick="savePaiement()">Enregistrer paiement</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Gestion Interne -->
+<div class="modal-overlay" id="modalInterne">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">Ajouter Dépense de Production</span>
+      <button class="modal-close" onclick="closeModal('modalInterne')">×</button>
+    </div>
+    <div class="form-grid">
+      <div class="form-group full">
+        <label>Commande concernée *</label>
+        <select id="intCommandeId" style="width:100%">
+          <option value="">— Sélectionner la commande —</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Date couture *</label>
+        <input type="date" id="intDateCouture">
+      </div>
+      <div class="form-group">
+        <label>Tailleur *</label>
+        <select id="intTailleur" style="width:100%">
+          <option value="">— Sélectionner —</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Frais tailleur (XAF) *</label>
+        <input type="number" id="intFraisTailleur" placeholder="0" min="0">
+      </div>
+      <div class="form-group">
+        <label>Autres dépenses (XAF)</label>
+        <input type="number" id="intAutresDepenses" placeholder="0" min="0" value="0">
+      </div>
+      <div class="form-group full">
+        <label>Note / Description</label>
+        <input type="text" id="intNote" placeholder="Ex: tissu, fournitures...">
+      </div>
+    </div>
+    <div class="form-actions">
+      <button class="btn btn-outline" onclick="closeModal('modalInterne')">Annuler</button>
+      <button class="btn btn-primary" onclick="saveInterne()">Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Clôture -->
+<div class="modal-overlay" id="modalCloture">
+  <div class="modal" style="border-top-color:var(--gold)">
+    <div class="modal-header">
+      <span class="modal-title">Clôturer la Semaine</span>
+      <button class="modal-close" onclick="closeModal('modalCloture')">×</button>
+    </div>
+    <div style="padding:1.5rem;">
+      <div class="week-selector" style="margin-bottom:1.5rem;">
+        <label style="font-size:11px;color:var(--muted)">Semaine à clôturer :</label>
+        <input type="week" id="clotureWeek">
+      </div>
+      <div id="cloturePreview" style="background:var(--surface-2);padding:1rem;border:1px solid var(--border);">
+        <div class="bilan-row"><span>Recettes</span><span id="clotureRecette" class="amount amount-positive">—</span></div>
+        <div class="bilan-row"><span>Dépenses</span><span id="clotureDepenses" class="amount amount-negative">—</span></div>
+        <div class="bilan-row bilan-total"><span>Bénéfice Net</span><span id="clotureBenefice" class="amount" style="font-size:1.1rem;">—</span></div>
+      </div>
+      <p style="font-size:11px;color:var(--muted);margin-top:1rem;">Cette opération enregistre définitivement le bilan de cette semaine dans l'historique.</p>
+    </div>
+    <div class="form-actions">
+      <button class="btn btn-outline" onclick="closeModal('modalCloture')">Annuler</button>
+      <button class="btn btn-gold" onclick="confirmerCloture()">✓ Confirmer la clôture</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOASTER -->
+<div id="toaster"></div>
+</div><!-- /appLayout -->
+
+<script>
+// ═══════════════════════════════════════════════════════
+//  ÉTAT DE L'APPLICATION
+// ═══════════════════════════════════════════════════════
+let DB = {
+  commandes: [],
+  paiements: [],
+  interne:   [],
+  bilans:    [],
+  tailleurs: [],
+  recus:     [],
+};
+
+let CONFIG = {
+  scriptUrl: 'https://script.google.com/macros/s/AKfycbw-vx1uWa_HdEsS1t3e7jYDPxKM4zmKwy7jUY4vzUwABs5bUnPZAdc4ji9EyeO8kmTq/exec',
+};
+
+// ═══════════════════════════════════════════════════════
+//  INITIALISATION
+// ═══════════════════════════════════════════════════════
+document.addEventListener('DOMContentLoaded', () => {
+  // L'initialisation se fait après connexion via showApp()
+  // Focus sur le champ mot de passe
+  setTimeout(() => document.getElementById('loginPassword')?.focus(), 100);
+});
+
+function loadFromStorage() {
+  try {
+    const saved = localStorage.getItem('zeleCouture_db');
+    if (saved) DB = JSON.parse(saved);
+    const cfg = localStorage.getItem('zeleCouture_config');
+    if (cfg) CONFIG = JSON.parse(cfg);
+    if (CONFIG.scriptUrl) document.getElementById('configScriptUrl').value = CONFIG.scriptUrl;
+  } catch(e) {}
+}
+
+function saveToStorage() {
+  localStorage.setItem('zeleCouture_db', JSON.stringify(DB));
+}
+
+function setDefaultWeek() {
+  const today = new Date();
+  const weekStr = toWeekString(today);
+  document.getElementById('weekFilter').value = weekStr;
+  document.getElementById('salairesWeek').value = weekStr;
+  document.getElementById('bilanWeek').value = weekStr;
+  document.getElementById('clotureWeek').value = weekStr;
+}
+
+function updateHeaderWeek() {
+  const today = new Date();
+  const { year, week } = getISOWeek(today);
+  document.getElementById('headerWeek').textContent = `S${week} / ${year}`;
+}
+
+// ═══════════════════════════════════════════════════════
+//  NAVIGATION
+// ═══════════════════════════════════════════════════════
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-' + id).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n => {
+    if (n.getAttribute('onclick')?.includes("'" + id + "'")) n.classList.add('active');
+  });
+
+  if (id === 'commandes') renderCommandes();
+  if (id === 'paiements') renderPaiements();
+  if (id === 'interne') renderInterne();
+  if (id === 'salaires') renderSalaires();
+  if (id === 'bilan') { renderBilanCourant(); renderBilanHistory(); }
+  if (id === 'dashboard') refreshDashboard();
+  if (id === 'recus') renderRecus();
+  if (id === 'tailleurs') renderStatsTailleurs();
+  if (id === 'rapports') renderRapports();
+}
+
+// ═══════════════════════════════════════════════════════
+//  UTILITAIRES DATE / SEMAINE
+// ═══════════════════════════════════════════════════════
+function toWeekString(date) {
+  const { year, week } = getISOWeek(date);
+  return `${year}-W${String(week).padStart(2, '0')}`;
+}
+
+function getISOWeek(date) {
+  const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+  const dayNum = d.getUTCDay() || 7;
+  d.setUTCDate(d.getUTCDate() + 4 - dayNum);
+  const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+  const week = Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+  return { year: d.getUTCFullYear(), week };
+}
+
+// Retourne [dimanche, samedi] de la semaine ISO (logique métier: Dim→Sam)
+function getWeekRange(weekStr) {
+  const [year, w] = weekStr.split('-W');
+  // Trouver le lundi de cette semaine ISO
+  const simple = new Date(parseInt(year), 0, 1 + (parseInt(w) - 1) * 7);
+  const dayOfWeek = simple.getDay();
+  const monday = new Date(simple);
+  monday.setDate(simple.getDate() - dayOfWeek + 1);
+
+  // Semaine métier: Dimanche précédent → Samedi
+  const sunday = new Date(monday);
+  sunday.setDate(monday.getDate() - 1);
+
+  const saturday = new Date(sunday);
+  saturday.setDate(sunday.getDate() + 6);
+
+  sunday.setHours(0, 0, 0, 0);
+  saturday.setHours(23, 59, 59, 999);
+  return { start: sunday, end: saturday };
+}
+
+function formatDate(dateStr) {
+  if (!dateStr) return '—';
+  const d = new Date(dateStr);
+  return d.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+}
+
+function formatAmount(n) {
+  return new Intl.NumberFormat('fr-FR').format(n || 0) + ' XAF';
+}
+
+function dateInRange(dateStr, start, end) {
+  const d = new Date(dateStr);
+  d.setHours(12);
+  return d >= start && d <= end;
+}
+
+// ═══════════════════════════════════════════════════════
+//  GÉNÉRATION D'IDS
+// ═══════════════════════════════════════════════════════
+function genId(prefix) {
+  return prefix + '-' + Date.now() + '-' + Math.floor(Math.random() * 1000);
+}
+
+// ═══════════════════════════════════════════════════════
+//  MODALS
+// ═══════════════════════════════════════════════════════
+function openModal(id) {
+  if (id === 'modalPaiement') populateCommandeSelect();
+  if (id === 'modalInterne')  populateInterneSelects();
+  if (id === 'modalCommande') {
+    document.getElementById('modalCommandeTitle').textContent = 'Nouvelle Commande';
+    document.getElementById('cmdEditId').value = '';
+    clearForm(['cmdDateArrivee','cmdNomClient','cmdModele','cmdPrixTotal','cmdAvance','cmdDateCouture']);
+    document.getElementById('cmdDateArrivee').value = new Date().toISOString().split('T')[0];
+    document.getElementById('cmdRendezVous').value = '';
+    document.getElementById('cmdStatut').value = 'En_Cours';
+  }
+  document.getElementById(id).classList.add('open');
+}
+
+function closeModal(id) {
+  document.getElementById(id).classList.remove('open');
+}
+
+function clearForm(fields) {
+  fields.forEach(f => { const el = document.getElementById(f); if (el) el.value = ''; });
+}
+
+// Fermer modal en cliquant l'overlay
+document.querySelectorAll('.modal-overlay').forEach(overlay => {
+  overlay.addEventListener('click', e => {
+    if (e.target === overlay) overlay.classList.remove('open');
+  });
+});
+
+// ═══════════════════════════════════════════════════════
+//  COMMANDES
+// ═══════════════════════════════════════════════════════
+async function saveCommande() {
+  const editId    = document.getElementById('cmdEditId').value;
+  const nomClient = document.getElementById('cmdNomClient').value.trim();
+  const modele    = document.getElementById('cmdModele').value.trim();
+  const prixTotal = parseFloat(document.getElementById('cmdPrixTotal').value) || 0;
+  const avance    = parseFloat(document.getElementById('cmdAvance').value) || 0;
+  const dateArrivee  = document.getElementById('cmdDateArrivee').value;
+  const statut       = document.getElementById('cmdStatut').value;
+  const dateCouture  = document.getElementById('cmdDateCouture').value;
+  const rendezVous   = document.getElementById('cmdRendezVous') ? document.getElementById('cmdRendezVous').value : '';
+
+  if (!nomClient || !modele || !prixTotal || !dateArrivee) {
+    toast('Veuillez remplir tous les champs obligatoires.', 'error'); return;
+  }
+
+  // Désactiver le bouton pendant l'envoi
+  const btn = document.querySelector('#modalCommande .btn-primary');
+  if (btn) { btn.textContent = '⟳ Enregistrement...'; btn.disabled = true; }
+
+  try {
+    if (CONFIG.scriptUrl) {
+      // ── ENVOI DIRECT VERS GOOGLE SHEETS ──
+      const params = new URLSearchParams({
+        action:     editId ? 'updateCommande' : 'addCommande',
+        id:         editId || '',
+        client:     nomClient,
+        modele:     modele,
+        prixTotal:  prixTotal,
+        avance:     avance,
+        rendezVous: rendezVous,
+        statutProd: statut,
+        dateCouture: dateCouture,
+      });
+      const res  = await fetch(CONFIG.scriptUrl + '?' + params.toString(), { redirect: 'follow' });
+      const data = await res.json();
+
+      if (data.error) {
+        toast('Erreur Google Sheets : ' + data.error, 'error');
+        return;
+      }
+
+      toast(editId ? '✓ Commande mise à jour dans Google Sheets !' : '✓ Commande enregistrée dans Google Sheets !', 'success');
+
+      // Sync local après succès
+      await syncFromSheets();
+
+    } else {
+      // ── MODE LOCAL (sans connexion) ──
+      if (editId) {
+        const idx = DB.commandes.findIndex(c => c.id === editId);
+        if (idx !== -1) {
+          DB.commandes[idx] = { ...DB.commandes[idx], nomClient, modele, prixTotal, avance, reste: prixTotal - avance, dateArrivee, statut, dateCouture };
+        }
+      } else {
+        const rendezVousLocal = document.getElementById('cmdRendezVous') ? document.getElementById('cmdRendezVous').value : '';
+        const cmd = { id: genId('CMD'), dateArrivee, nomClient, modele, prixTotal, avance, reste: prixTotal - avance, statut, dateCouture, rendezVous: rendezVousLocal };
+        DB.commandes.push(cmd);
+        if (avance > 0) {
+          DB.paiements.push({ id: genId('PAY'), commandeId: cmd.id, date: dateArrivee, montant: avance, note: 'Avance initiale' });
+        }
+      }
+      saveToStorage();
+      refreshAll();
+      toast(editId ? 'Commande mise à jour.' : 'Commande créée (mode local).', 'success');
+    }
+  } catch(e) {
+    toast('Erreur : ' + e.message, 'error');
+  } finally {
+    if (btn) { btn.textContent = 'Enregistrer'; btn.disabled = false; }
+    closeModal('modalCommande');
+  }
+}
+
+function editCommande(id) {
+  const cmd = DB.commandes.find(c => c.id === id);
+  if (!cmd) return;
+  document.getElementById('modalCommandeTitle').textContent = 'Modifier Commande';
+  document.getElementById('cmdEditId').value = id;
+  document.getElementById('cmdDateArrivee').value = cmd.dateArrivee;
+  document.getElementById('cmdNomClient').value = cmd.nomClient;
+  document.getElementById('cmdModele').value = cmd.modele;
+  document.getElementById('cmdPrixTotal').value = cmd.prixTotal;
+  document.getElementById('cmdAvance').value = cmd.avance;
+  document.getElementById('cmdStatut').value = cmd.statut;
+  document.getElementById('cmdRendezVous').value = cmd.rendezVous || '';
+  document.getElementById('cmdDateCouture').value = cmd.dateCouture || '';
+  openModal('modalCommande');
+}
+
+function deleteCommande(id) {
+  if (USER_ROLE === 'employe') { toast('Action reservee au patron.', 'error'); return; }
+  if (!confirm('Supprimer cette commande ?')) return;
+  DB.commandes = DB.commandes.filter(c => c.id !== id);
+  saveToStorage(); refreshAll();
+  toast('Commande supprimée.', 'success');
+}
+
+function terminerCommande(id) {
+  const today = new Date().toISOString().split('T')[0];
+  const cmd = DB.commandes.find(c => c.id === id);
+  if (!cmd) return;
+  const dateCouture = prompt('Date de couture (YYYY-MM-DD) :', today);
+  if (!dateCouture) return;
+  cmd.statut = 'Terminé';
+  cmd.dateCouture = dateCouture;
+  saveToStorage(); refreshAll();
+  toast('Commande marquée comme terminée.', 'success');
+}
+
+function renderCommandes() {
+  const search = (document.getElementById('searchCommandes')?.value || '').toLowerCase();
+  const filterStatut = document.getElementById('filterStatut')?.value || '';
+  let data = DB.commandes.filter(c => {
+    const matchSearch = !search || c.nomClient.toLowerCase().includes(search) || c.id.toLowerCase().includes(search);
+    const matchStatut = !filterStatut || c.statut === filterStatut;
+    return matchSearch && matchStatut;
+  }).sort((a, b) => new Date(b.dateArrivee) - new Date(a.dateArrivee));
+
+  const tbody = document.getElementById('commandesBody');
+  if (!data.length) {
+    tbody.innerHTML = `<tr><td colspan="11"><div class="empty-state"><div class="empty-state-icon">✦</div><div class="empty-state-text">Aucune commande</div></div></td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = data.map(c => {
+    const totalPaye = DB.paiements.filter(p => p.commandeId === c.id).reduce((s, p) => s + p.montant, 0);
+    const resteReel = c.prixTotal - totalPaye;
+    const pctPaye = c.prixTotal > 0 ? Math.min(100, Math.round(totalPaye / c.prixTotal * 100)) : 0;
+    return `<tr>
+      <td style="font-size:10px;color:var(--muted)">${c.id}</td>
+      <td>${formatDate(c.dateArrivee)}</td>
+      <td><strong>${c.nomClient}</strong></td>
+      <td>${c.modele}</td>
+      <td class="amount">${formatAmount(c.prixTotal)}</td>
+      <td>
+        <span class="amount amount-positive">${formatAmount(totalPaye)}</span>
+        <div class="progress-bar" style="margin-top:4px;width:80px"><div class="progress-fill" style="width:${pctPaye}%"></div></div>
+      </td>
+      <td class="amount ${resteReel > 0 ? 'amount-negative' : 'amount-muted'}">${formatAmount(resteReel)}</td>
+      <td><span class="badge badge-${c.statut === 'Terminé' ? 'termine' : 'en-cours'}">${c.statut}</span></td>
+      <td style="font-size:11px">${c.rendezVous ? formatDate(c.rendezVous) : '<span style="color:var(--muted)">—</span>'}</td>
+      <td style="font-size:11px">${c.dateCouture ? formatDate(c.dateCouture) : '<span style="color:var(--muted)">—</span>'}</td>
+      <td>
+        <div style="display:flex;gap:4px;flex-wrap:wrap">
+          ${c.statut === 'En_Cours' ? `<button class="btn btn-success btn-sm" onclick="terminerCommande('${c.id}')" title="Marquer terminé">✓</button>` : ''}
+          <button class="btn btn-gold btn-sm" onclick="genererRecuClient('${c.id}')" title="Générer reçu PDF">🧾</button>
+          <button class="btn btn-outline btn-sm" onclick="editCommande('${c.id}')" title="Modifier">✎</button>
+          <button class="btn btn-danger btn-sm" onclick="deleteCommande('${c.id}')" title="Supprimer">✕</button>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+// ═══════════════════════════════════════════════════════
+//  PAIEMENTS
+// ═══════════════════════════════════════════════════════
+function populateInterneSelects() {
+  // Peupler le select des commandes
+  const selCmd = document.getElementById('intCommandeId');
+  selCmd.innerHTML = '<option value="">— Sélectionner la commande —</option>';
+  const cmdEnCours = DB.commandes.filter(c => c.statut === 'En_Cours' || c.statut !== 'Terminé');
+  cmdEnCours.forEach(c => {
+    selCmd.innerHTML += `<option value="${c.id}">${c.id} — ${c.nomClient} (${c.modele})</option>`;
+  });
+
+  // Peupler le select des tailleurs
+  const selTailleur = document.getElementById('intTailleur');
+  selTailleur.innerHTML = '<option value="">— Sélectionner —</option>';
+
+  // Depuis DB.tailleurs si disponible (après sync)
+  if (DB.tailleurs && DB.tailleurs.length) {
+    DB.tailleurs.forEach(t => {
+      const nom = t.Nom_Officiel || t.nom || t.id || '';
+      selTailleur.innerHTML += `<option value="${nom}">${nom}</option>`;
+    });
+  } else {
+    // Tailleurs par défaut depuis GESTION_INTERNE
+    const tailleursList = ['OUMAR', 'FARKOU', 'BABA'];
+    tailleursList.forEach(t => {
+      selTailleur.innerHTML += `<option value="${t}">${t}</option>`;
+    });
+  }
+
+  // Date par défaut = aujourd'hui
+  document.getElementById('intDateCouture').value = new Date().toISOString().split('T')[0];
+}
+
+function populateCommandeSelect() {
+  const sel = document.getElementById('payCommandeId');
+  sel.innerHTML = '<option value="">— Sélectionner —</option>';
+  DB.commandes.forEach(c => {
+    const totalPaye = DB.paiements.filter(p => p.commandeId === c.id).reduce((s, p) => s + p.montant, 0);
+    const reste = c.prixTotal - totalPaye;
+    sel.innerHTML += `<option value="${c.id}">${c.id} — ${c.nomClient} (reste: ${formatAmount(reste)})</option>`;
+  });
+  document.getElementById('payDate').value = new Date().toISOString().split('T')[0];
+}
+
+async function savePaiement() {
+  const commandeId = document.getElementById('payCommandeId').value;
+  const date    = document.getElementById('payDate').value;
+  const montant = parseFloat(document.getElementById('payMontant').value) || 0;
+  const note    = document.getElementById('payNote').value;
+
+  if (!commandeId || !date || !montant) {
+    toast('Veuillez remplir tous les champs obligatoires.', 'error'); return;
+  }
+
+  const btn = document.querySelector('#modalPaiement .btn-success');
+  if (btn) { btn.textContent = '⟳ Enregistrement...'; btn.disabled = true; }
+
+  try {
+    if (CONFIG.scriptUrl) {
+      // ── ENVOI DIRECT VERS GOOGLE SHEETS ──
+      const cmd = DB.commandes.find(c => c.id === commandeId);
+      const params = new URLSearchParams({
+        action:     'addPaiement',
+        commandeId: commandeId,
+        client:     cmd ? cmd.nomClient : '',
+        montant:    montant,
+        date:       date,
+        observation: note,
+        type:       'Paiement',
+      });
+      const res  = await fetch(CONFIG.scriptUrl + '?' + params.toString(), { redirect: 'follow' });
+      const data = await res.json();
+
+      if (data.error) { toast('Erreur : ' + data.error, 'error'); return; }
+
+      toast('✓ Paiement enregistré dans Google Sheets !', 'success');
+      await syncFromSheets();
+
+    } else {
+      const cmd = DB.commandes.find(c => c.id === commandeId);
+      if (!cmd) return;
+      DB.paiements.push({ id: genId('PAY'), commandeId, date, montant, note });
+      const totalPaye = DB.paiements.filter(p => p.commandeId === commandeId).reduce((s, p) => s + p.montant, 0);
+      cmd.avance = totalPaye;
+      cmd.reste  = Math.max(0, cmd.prixTotal - totalPaye);
+      saveToStorage();
+      refreshAll();
+      toast('Paiement enregistré (mode local).', 'success');
+    }
+  } catch(e) {
+    toast('Erreur : ' + e.message, 'error');
+  } finally {
+    if (btn) { btn.textContent = 'Enregistrer paiement'; btn.disabled = false; }
+    closeModal('modalPaiement');
+  }
+}
+
+function deletePaiement(id) {
+  if (USER_ROLE === 'employe') { toast('Action reservee au patron.', 'error'); return; }
+  if (!confirm('Supprimer ce paiement ?')) return;
+  DB.paiements = DB.paiements.filter(p => p.id !== id);
+  saveToStorage(); refreshAll();
+  toast('Paiement supprimé.', 'success');
+}
+
+function renderPaiements() {
+  const tbody = document.getElementById('paiementsBody');
+  const sorted = [...DB.paiements].sort((a, b) => new Date(b.date) - new Date(a.date));
+
+  const totalEncaisse = DB.paiements.reduce((s, p) => s + p.montant, 0);
+  const totalPrixCommandes = DB.commandes.reduce((s, c) => s + c.prixTotal, 0);
+
+  document.getElementById('totalEncaisse').textContent = formatAmount(totalEncaisse);
+  document.getElementById('nbPaiements').textContent = DB.paiements.length;
+  document.getElementById('resteEncaisser').textContent = formatAmount(Math.max(0, totalPrixCommandes - totalEncaisse));
+
+  if (!sorted.length) {
+    tbody.innerHTML = `<tr><td colspan="6"><div class="empty-state"><div class="empty-state-icon">◎</div><div class="empty-state-text">Aucun paiement</div></div></td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = sorted.map(p => {
+    const cmd = DB.commandes.find(c => c.id === p.commandeId);
+    return `<tr>
+      <td style="font-size:10px;color:var(--muted)">${p.id}</td>
+      <td>${p.commandeId}</td>
+      <td>${cmd ? cmd.nomClient : '<em style="color:var(--muted)">N/A</em>'}</td>
+      <td>${formatDate(p.date)}</td>
+      <td class="amount amount-positive">${formatAmount(p.montant)}</td>
+      <td><button class="btn btn-danger btn-sm" onclick="deletePaiement('${p.id}')">✕</button></td>
+    </tr>`;
+  }).join('');
+}
+
+// ═══════════════════════════════════════════════════════
+//  GESTION INTERNE
+// ═══════════════════════════════════════════════════════
+async function saveInterne() {
+  const commandeId    = document.getElementById('intCommandeId').value;
+  const dateCouture   = document.getElementById('intDateCouture').value;
+  const tailleur      = document.getElementById('intTailleur').value;
+  const fraisTailleur = parseFloat(document.getElementById('intFraisTailleur').value) || 0;
+  const autresDepenses= parseFloat(document.getElementById('intAutresDepenses').value) || 0;
+  const note          = document.getElementById('intNote').value;
+
+  if (!commandeId || !dateCouture || !tailleur || !fraisTailleur) {
+    toast('Veuillez remplir tous les champs obligatoires.', 'error'); return;
+  }
+
+  const btn = document.querySelector('#modalInterne .btn-primary');
+  if (btn) { btn.textContent = '⟳ Enregistrement...'; btn.disabled = true; }
+
+  try {
+    // Récupérer l'ID tailleur depuis la liste
+    const tailleurObj = DB.tailleurs ? DB.tailleurs.find(t => t.Nom_Officiel === tailleur || t.id === tailleur) : null;
+    const tailleurId  = tailleurObj ? (tailleurObj.ID_Tailleur || tailleurObj.id) : tailleur;
+
+    if (CONFIG.scriptUrl) {
+      // Envoi direct Google Sheets
+      const params = new URLSearchParams({
+        action:         'addInterne',
+        commandeId:     commandeId,
+        tailleurId:     tailleurId,
+        dateCouture:    dateCouture,
+        fraisTailleur:  fraisTailleur,
+        autresDepenses: autresDepenses,
+        note:           note,
+      });
+      const res  = await fetch(CONFIG.scriptUrl + '?' + params.toString(), { redirect: 'follow' });
+      const data = await res.json();
+      if (data.error) { toast('Erreur : ' + data.error, 'error'); return; }
+      toast('✓ Dépense enregistrée dans Google Sheets !', 'success');
+      await syncFromSheets();
+    } else {
+      DB.interne.push({ id: genId('INT'), commandeId, dateCouture, tailleur, fraisTailleur, autresDepenses, note });
+      saveToStorage();
+      refreshAll();
+      toast('Dépense enregistrée (mode local).', 'success');
+    }
+  } catch(e) {
+    toast('Erreur : ' + e.message, 'error');
+  } finally {
+    if (btn) { btn.textContent = 'Enregistrer'; btn.disabled = false; }
+    closeModal('modalInterne');
+  }
+}
+
+function deleteInterne(id) {
+  if (USER_ROLE === 'employe') { toast('Action reservee au patron.', 'error'); return; }
+  if (!confirm('Supprimer cette entree ?')) return;
+  DB.interne = DB.interne.filter(i => i.id !== id);
+  saveToStorage(); refreshAll();
+  toast('Entrée supprimée.', 'success');
+}
+
+function renderInterne() {
+  const tbody = document.getElementById('interneBody');
+  const sorted = [...DB.interne].sort((a, b) => new Date(b.dateCouture) - new Date(a.dateCouture));
+
+  if (!sorted.length) {
+    tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state"><div class="empty-state-icon">⊡</div><div class="empty-state-text">Aucune dépense</div></div></td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = sorted.map(i => {
+    const { year, week } = getISOWeek(new Date(i.dateCouture || new Date()));
+    const cmd = DB.commandes.find(c => c.id === (i.commandeId || i.id));
+    return `<tr>
+      <td style="font-size:10px;color:var(--muted)">${i.commandeId || '—'}</td>
+      <td>${cmd ? `<strong>${cmd.nomClient}</strong><br><span style="font-size:10px;color:var(--muted)">${cmd.modele}</span>` : '<span style="color:var(--muted)">—</span>'}</td>
+      <td>${formatDate(i.dateCouture)}</td>
+      <td><strong>${i.tailleur}</strong></td>
+      <td style="font-size:10px;color:var(--muted)">S${week}/${year}</td>
+      <td class="amount">${formatAmount(i.fraisTailleur)}</td>
+      <td class="amount amount-muted">${formatAmount(i.autresDepenses)}</td>
+      <td class="amount amount-negative">${formatAmount(i.fraisTailleur + i.autresDepenses)}</td>
+      <td><button class="btn btn-danger btn-sm" onclick="deleteInterne('${i.id}')">✕</button></td>
+    </tr>`;
+  }).join('');
+}
+
+// ═══════════════════════════════════════════════════════
+//  CALCUL SALAIRES
+// ═══════════════════════════════════════════════════════
+function renderSalaires() {
+  const weekStr = document.getElementById('salairesWeek').value;
+  if (!weekStr) return;
+
+  const { start, end } = getWeekRange(weekStr);
+  const { year, week } = getISOWeek(new Date(start.getTime() + 86400000)); // Lundi de la semaine
+
+  document.getElementById('salairesWeekLabel').textContent =
+    `S${week}/${year} — ${start.toLocaleDateString('fr-FR')} au ${end.toLocaleDateString('fr-FR')}`;
+
+  const depSemaine = DB.interne.filter(i => dateInRange(i.dateCouture, start, end));
+
+  // Grouper par tailleur
+  const bySailleur = {};
+  depSemaine.forEach(i => {
+    if (!bySailleur[i.tailleur]) bySailleur[i.tailleur] = { count: 0, frais: 0 };
+    bySailleur[i.tailleur].count++;
+    bySailleur[i.tailleur].frais += i.fraisTailleur;
+  });
+
+  const tbody = document.getElementById('salairesBody');
+  const tailleurs = Object.entries(bySailleur);
+
+  if (!tailleurs.length) {
+    tbody.innerHTML = `<tr><td colspan="4"><div class="empty-state"><div class="empty-state-icon">⊛</div><div class="empty-state-text">Aucune production cette semaine</div></div></td></tr>`;
+    document.getElementById('totalSalaires').textContent = '0 XAF';
+    return;
+  }
+
+  const total = tailleurs.reduce((s, [, v]) => s + v.frais, 0);
+
+  tbody.innerHTML = tailleurs.map(([nom, data]) => `<tr>
+    <td><strong>${nom}</strong></td>
+    <td>${data.count}</td>
+    <td class="amount">${formatAmount(data.frais)}</td>
+    <td class="amount amount-negative" style="font-size:1rem">${formatAmount(data.frais)}</td>
+  </tr>`).join('');
+
+  document.getElementById('totalSalaires').textContent = formatAmount(total);
+}
+
+// ═══════════════════════════════════════════════════════
+//  CALCUL FINANCIER PAR SEMAINE
+// ═══════════════════════════════════════════════════════
+function calcFinances(weekStr) {
+  const { start, end } = getWeekRange(weekStr);
+
+  const recette = DB.paiements
+    .filter(p => dateInRange(p.date, start, end))
+    .reduce((s, p) => s + p.montant, 0);
+
+  const depSemaine = DB.interne.filter(i => dateInRange(i.dateCouture, start, end));
+  const salaires = depSemaine.reduce((s, i) => s + i.fraisTailleur, 0);
+  const autres = depSemaine.reduce((s, i) => s + i.autresDepenses, 0);
+  const depenses = salaires + autres;
+
+  return { recette, salaires, autres, depenses, benefice: recette - depenses };
+}
+
+// ═══════════════════════════════════════════════════════
+//  BILAN
+// ═══════════════════════════════════════════════════════
+function renderBilanCourant() {
+  const weekStr = document.getElementById('bilanWeek').value;
+  if (!weekStr) return;
+
+  const f = calcFinances(weekStr);
+
+  document.getElementById('bilanRecette').textContent = formatAmount(f.recette);
+  document.getElementById('bilanSalaires').textContent = formatAmount(f.salaires);
+  document.getElementById('bilanAutres').textContent = formatAmount(f.autres);
+  document.getElementById('bilanTotalDep').textContent = formatAmount(f.depenses);
+
+  const beneficeEl = document.getElementById('bilanBeneficeNet');
+  beneficeEl.textContent = formatAmount(f.benefice);
+  beneficeEl.className = 'amount ' + (f.benefice >= 0 ? 'amount-positive' : 'amount-negative');
+}
+
+function renderBilanHistory() {
+  const tbody = document.getElementById('bilanHistoryBody');
+  const sorted = [...DB.bilans].sort((a, b) => b.annee - a.annee || b.semaine - a.semaine);
+
+  if (!sorted.length) {
+    tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state"><div class="empty-state-icon">◱</div><div class="empty-state-text">Aucun bilan clôturé</div></div></td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = sorted.map(b => `<tr>
+    <td>S${b.semaine}</td>
+    <td>${b.annee}</td>
+    <td class="amount amount-positive">${formatAmount(b.recette)}</td>
+    <td class="amount amount-negative">${formatAmount(b.depenses)}</td>
+    <td class="amount ${b.benefice >= 0 ? 'amount-positive' : 'amount-negative'}">${formatAmount(b.benefice)}</td>
+    <td style="font-size:11px">${formatDate(b.dateCloture)}</td>
+    <td><button class="btn btn-outline btn-sm" onclick="exportBilanPDF(${JSON.stringify(b).replace(/"/g,"'")})">PDF</button></td>
+  </tr>`).join('');
+}
+
+function ouvrirCloture() {
+  const weekStr = document.getElementById('bilanWeek').value;
+  document.getElementById('clotureWeek').value = weekStr;
+  updateCloturePreview();
+  openModal('modalCloture');
+}
+
+function updateCloturePreview() {
+  const weekStr = document.getElementById('clotureWeek').value;
+  if (!weekStr) return;
+  const f = calcFinances(weekStr);
+  document.getElementById('clotureRecette').textContent = formatAmount(f.recette);
+  document.getElementById('clotureDepenses').textContent = formatAmount(f.depenses);
+  const el = document.getElementById('clotureBenefice');
+  el.textContent = formatAmount(f.benefice);
+  el.className = 'amount ' + (f.benefice >= 0 ? 'amount-positive' : 'amount-negative');
+}
+
+document.getElementById('clotureWeek').addEventListener('change', updateCloturePreview);
+
+function confirmerCloture() {
+  const weekStr = document.getElementById('clotureWeek').value;
+  if (!weekStr) return;
+
+  const [year, w] = weekStr.split('-W');
+  const semaine = parseInt(w);
+  const annee = parseInt(year);
+
+  if (DB.bilans.find(b => b.semaine === semaine && b.annee === annee)) {
+    if (!confirm(`Un bilan pour S${semaine}/${annee} existe déjà. Écraser ?`)) return;
+    DB.bilans = DB.bilans.filter(b => !(b.semaine === semaine && b.annee === annee));
+  }
+
+  const f = calcFinances(weekStr);
+  DB.bilans.push({
+    semaine, annee,
+    recette: f.recette,
+    salaires: f.salaires,
+    autres: f.autres,
+    depenses: f.depenses,
+    benefice: f.benefice,
+    dateCloture: new Date().toISOString().split('T')[0]
+  });
+
+  saveToStorage();
+  closeModal('modalCloture');
+  renderBilanHistory();
+  toast(`Bilan S${semaine}/${annee} clôturé avec succès.`, 'success');
+}
+
+function exportBilanPDF(bilan) {
+  // Génération d'un PDF simple via impression navigateur
+  const win = window.open('', '_blank');
+  win.document.write(`<!DOCTYPE html>
+<html><head>
+<meta charset="UTF-8">
+<title>Bilan S${bilan.semaine}/${bilan.annee} — ZELE COUTURE</title>
+<style>
+  body { font-family: Georgia, serif; max-width: 700px; margin: 40px auto; color: #1a1a1a; }
+  h1 { font-size: 1.8rem; border-bottom: 2px solid #c9a84c; padding-bottom: 0.5rem; }
+  .meta { color: #666; font-size: 0.9rem; margin-bottom: 2rem; }
+  table { width: 100%; border-collapse: collapse; margin-top: 1.5rem; }
+  th { background: #f5f0e8; padding: 10px; text-align: left; font-size: 0.8rem; letter-spacing: 0.1em; text-transform: uppercase; }
+  td { padding: 10px; border-bottom: 1px solid #e8e0d0; }
+  .total-row { font-weight: bold; background: #faf8f0; }
+  .benefice { font-size: 1.4rem; text-align: center; padding: 1.5rem; margin-top: 1.5rem; border: 2px solid #c9a84c; background: #fffdf5; }
+  .positive { color: #4a6741; } .negative { color: #b5472a; }
+  @media print { body { margin: 20px; } }
+</style>
+</head><body>
+<h1>ZELE COUTURE — Bilan Hebdomadaire</h1>
+<div class="meta">Semaine ${bilan.semaine} / ${bilan.annee} &nbsp;|&nbsp; Clôturé le ${bilan.dateCloture}</div>
+<table>
+  <thead><tr><th>Poste</th><th>Montant (XAF)</th></tr></thead>
+  <tbody>
+    <tr><td>Recettes (paiements reçus)</td><td class="positive">${formatAmount(bilan.recette)}</td></tr>
+    <tr><td>— Salaires tailleurs</td><td>− ${formatAmount(bilan.salaires)}</td></tr>
+    <tr><td>— Autres dépenses</td><td>− ${formatAmount(bilan.autres)}</td></tr>
+    <tr class="total-row"><td>Total dépenses</td><td class="negative">${formatAmount(bilan.depenses)}</td></tr>
+  </tbody>
+</table>
+<div class="benefice ${bilan.benefice >= 0 ? 'positive' : 'negative'}">
+  Bénéfice Net : ${formatAmount(bilan.benefice)}
+</div>
+<p style="text-align:center;color:#999;font-size:0.8rem;margin-top:2rem">Généré par ZELE COUTURE Système de Gestion</p>
+</body></html>`);
+  win.document.close();
+  win.print();
+}
+
+// ═══════════════════════════════════════════════════════
+//  DASHBOARD
+// ═══════════════════════════════════════════════════════
+function refreshDashboard() {
+  const weekStr = document.getElementById('weekFilter').value;
+  if (!weekStr) return;
+
+  const f = calcFinances(weekStr);
+  const [year, w] = weekStr.split('-W');
+
+  document.getElementById('currentWeekLabel').textContent = `Semaine ${parseInt(w)} / ${year}`;
+  document.getElementById('kpiRecette').textContent = formatAmount(f.recette);
+  document.getElementById('kpiDepenses').textContent = formatAmount(f.depenses);
+
+  const beneficeEl = document.getElementById('kpiBenefice');
+  beneficeEl.textContent = formatAmount(f.benefice);
+  beneficeEl.className = 'kpi-value ' + (f.benefice >= 0 ? 'amount-positive' : 'amount-negative');
+
+  const cmdEnCours = DB.commandes.filter(c => c.statut === 'En_Cours').length;
+  document.getElementById('kpiCommandes').textContent = cmdEnCours;
+
+  // Sidebar
+  const sidebarEl = document.getElementById('sidebarBenefice');
+  sidebarEl.textContent = formatAmount(f.benefice);
+  sidebarEl.style.color = f.benefice >= 0 ? 'var(--gold)' : 'var(--rust)';
+
+  // Dernières commandes
+  const recentCmds = [...DB.commandes].sort((a, b) => new Date(b.dateArrivee) - new Date(a.dateArrivee)).slice(0, 5);
+  const dashCmdsDiv = document.getElementById('dashCommandesTable');
+  if (recentCmds.length) {
+    dashCmdsDiv.innerHTML = `<table><thead><tr><th>Client</th><th>Modèle</th><th>Statut</th><th>Prix</th></tr></thead><tbody>
+      ${recentCmds.map(c => `<tr>
+        <td>${c.nomClient}</td>
+        <td>${c.modele}</td>
+        <td><span class="badge badge-${c.statut === 'Terminé' ? 'termine' : 'en-cours'}">${c.statut}</span></td>
+        <td class="amount">${formatAmount(c.prixTotal)}</td>
+      </tr>`).join('')}
+    </tbody></table>`;
+  }
+
+  // Paiements récents
+  const recentPays = [...DB.paiements].sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 5);
+  const dashPaysDiv = document.getElementById('dashPaiementsTable');
+  if (recentPays.length) {
+    dashPaysDiv.innerHTML = `<table><thead><tr><th>Client</th><th>Date</th><th>Montant</th></tr></thead><tbody>
+      ${recentPays.map(p => {
+        const cmd = DB.commandes.find(c => c.id === p.commandeId);
+        return `<tr>
+          <td>${cmd ? cmd.nomClient : '—'}</td>
+          <td>${formatDate(p.date)}</td>
+          <td class="amount amount-positive">${formatAmount(p.montant)}</td>
+        </tr>`;
+      }).join('')}
+    </tbody></table>`;
+  }
+}
+
+function refreshAll() {
+  refreshDashboard();
+  renderCommandes();
+  renderPaiements();
+  renderInterne();
+  renderSalaires();
+  renderBilanCourant();
+  renderBilanHistory();
+}
+
+// ═══════════════════════════════════════════════════════
+//  CONFIG
+// ═══════════════════════════════════════════════════════
+function saveConfig() {
+  CONFIG.scriptUrl = document.getElementById('configScriptUrl').value.trim();
+  localStorage.setItem('zeleCouture_config', JSON.stringify(CONFIG));
+  toast('Configuration enregistrée.', 'success');
+}
+
+function testConnection() {
+  if (!CONFIG.scriptUrl) { toast('Aucune URL configurée.', 'error'); return; }
+  toast('Test de connexion en cours...', '');
+  fetch(CONFIG.scriptUrl + '?action=ping')
+    .then(r => r.json())
+    .then(d => {
+      if (d.status === 'ok') toast('✓ Connexion Google Sheets réussie !', 'success');
+      else toast('Réponse : ' + JSON.stringify(d), 'error');
+    })
+    .catch(e => toast('Échec connexion : ' + e.message, 'error'));
+}
+
+// ═══════════════════════════════════════════════════════
+//  SYNC GOOGLE SHEETS ← NOUVELLE FONCTION
+// ═══════════════════════════════════════════════════════
+async function syncFromSheets() {
+  if (!CONFIG.scriptUrl) { toast('URL non configurée.', 'error'); return; }
+  const btn = document.getElementById('syncBtn');
+  if (btn) { btn.textContent = '⟳ Sync...'; btn.disabled = true; }
+  try {
+    // Utilise le proxy JSONP pour éviter le CORS avec Google Apps Script
+    const url = CONFIG.scriptUrl + '?action=getAll';
+    const res  = await fetch(url, { 
+      method: 'GET',
+      redirect: 'follow',
+    });
+    const data = await res.json();
+    if (data.error) { toast('Erreur : ' + data.error, 'error'); return; }
+
+    DB.commandes = (data.commandes || []).map(c => ({
+      id:          c['Numero_Commande'] || '',
+      dateArrivee: (c['Date_Arrivee']  || '').split(' ')[0],
+      nomClient:   c['Client']         || '',
+      modele:      c['Modele']         || '',
+      prixTotal:   parseFloat(c['Prix_Total'])    || 0,
+      avance:      parseFloat(c['Total_Paye'])    || 0,
+      reste:       parseFloat(c['Reste_A_Payer']) || 0,
+      statut:      c['Statut_Production'] === 'Terminé' ? 'Terminé' : 'En_Cours',
+      rendezVous:  (c['Rendez-Vous'] || '').split(' ')[0],
+      dateCouture: '',
+    }));
+
+    DB.paiements = (data.paiements || []).map(p => ({
+      id:         p['Numero_Recu']     || ('RP-' + Date.now() + Math.random()),
+      commandeId: p['Numero_Commande'] || '',
+      date:       (p['Date_Paiement'] || '').split(' ')[0],
+      montant:    parseFloat(p['Montant']) || 0,
+      note:       p['Observation']    || '',
+    }));
+
+    DB.interne = (data.interne || []).map(i => ({
+      id:             i['Numero_Commande'] + '-' + Math.random(),
+      dateCouture:    '',
+      tailleur:       i['Tailleur_ID']    || '',
+      fraisTailleur:  parseFloat(i['Frais_Tailleur'])     || 0,
+      autresDepenses: parseFloat(i['Depense_Necessaire']) || 0,
+      note:           '',
+    }));
+
+    DB.bilans = (data.bilans || []).map(b => ({
+      semaine:     parseInt(b['Semaine'])          || 0,
+      annee:       parseInt(b['Annee'])            || 0,
+      recette:     parseFloat(b['Total_Recette'])  || 0,
+      depenses:    parseFloat(b['Total_Depenses']) || 0,
+      benefice:    parseFloat(b['Total_Benefice']) || 0,
+      dateCloture: (b['Date_cloture'] || '').split(' ')[0],
+    }));
+
+    DB.recus = (data.recus || []).map(r => ({
+      id:         r['Numero_Recu']     || '',
+      commandeId: r['Numero_Commande'] || '',
+      client:     r['Client']          || '',
+      montant:    parseFloat(r['Montant']) || 0,
+      date:       (r['Date'] || '').split(' ')[0],
+      type:       r['Type'] || '',
+    }));
+
+    DB.tailleurs = (data.tailleurs || []).map(t => ({
+      id:   t['ID_Tailleur']  || '',
+      nom:  t['Nom_Officiel'] || '',
+      Nom_Officiel: t['Nom_Officiel'] || '',
+      ID_Tailleur:  t['ID_Tailleur']  || '',
+    }));
+
+    saveToStorage();
+    refreshAll();
+    toast('✓ Synchronisé — ' + DB.commandes.length + ' commandes, ' + DB.paiements.length + ' paiements', 'success');
+  } catch(e) {
+    toast('Erreur sync : ' + e.message, 'error');
+  } finally {
+    if (btn) { btn.textContent = '⟳ Sync Google Sheets'; btn.disabled = false; }
+  }
+}
+
+async function apiCall(action, data = {}) {
+  if (!CONFIG.scriptUrl) return null;
+  try {
+    // Pour Google Apps Script, on passe les params en GET
+    const params = new URLSearchParams({ action, ...data });
+    const res = await fetch(CONFIG.scriptUrl + '?' + params.toString(), {
+      method: 'GET',
+      redirect: 'follow',
+    });
+    return await res.json();
+  } catch(e) { 
+    console.error('apiCall error:', e);
+    return null; 
+  }
+}
+
+function exportData() {
+  const blob = new Blob([JSON.stringify(DB, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'zelecouture_backup_' + new Date().toISOString().split('T')[0] + '.json';
+  a.click();
+}
+
+function importData(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      DB = JSON.parse(e.target.result);
+      saveToStorage(); refreshAll();
+      toast('Données importées avec succès.', 'success');
+    } catch {
+      toast('Fichier JSON invalide.', 'error');
+    }
+  };
+  reader.readAsText(file);
+}
+
+function clearAllData() {
+  if (!confirm('Effacer TOUTES les données ? Cette action est irréversible.')) return;
+  DB = { commandes: [], paiements: [], interne: [], bilans: [] };
+  saveToStorage(); refreshAll();
+  toast('Toutes les données ont été effacées.', 'success');
+}
+
+// ═══════════════════════════════════════════════════════
+//  HISTORIQUE REÇUS
+// ═══════════════════════════════════════════════════════
+function renderRecus() {
+  const search = (document.getElementById('searchRecus')?.value || '').toLowerCase();
+  const recus  = (DB.recus || []).filter(r =>
+    !search || r.client.toLowerCase().includes(search) ||
+    r.commandeId.toLowerCase().includes(search) ||
+    r.id.toLowerCase().includes(search)
+  ).sort((a, b) => new Date(b.date) - new Date(a.date));
+
+  // KPIs
+  const now  = new Date();
+  const mois = now.getMonth();
+  const an   = now.getFullYear();
+  const recusMois = recus.filter(r => {
+    const d = new Date(r.date);
+    return d.getMonth() === mois && d.getFullYear() === an;
+  });
+
+  document.getElementById('kpiNbRecus').textContent      = recus.length;
+  document.getElementById('kpiMontantRecus').textContent = formatAmount(recus.reduce((s,r) => s + r.montant, 0));
+  document.getElementById('kpiRecusMois').textContent    = recusMois.length;
+
+  const tbody = document.getElementById('recusBody');
+  if (!recus.length) {
+    tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state"><div class="empty-state-icon">🧾</div><div class="empty-state-text">Aucun reçu généré</div></div></td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = recus.map(r => {
+    const typeBadge = r.type === 'Avance' ? 'badge-partiel' : r.type === 'Solde' ? 'badge-solde' : 'badge-en-cours';
+    const typeLabel = r.type || 'Paiement';
+    return `<tr>
+      <td style="font-size:10px;color:var(--muted);font-family:var(--font-mono)">${r.id}</td>
+      <td style="font-size:11px;color:var(--muted)">${r.commandeId}</td>
+      <td><strong>${r.client}</strong></td>
+      <td class="amount amount-positive">${formatAmount(r.montant)}</td>
+      <td style="font-size:11px">${formatDate(r.date)}</td>
+      <td><span class="badge ${typeBadge}">${typeLabel}</span></td>
+      <td>
+        <button class="btn btn-gold btn-sm" onclick="regenRecu('${r.commandeId}', ${r.montant})" title="Régénérer reçu PDF">🧾 PDF</button>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+async function regenRecu(commandeId, montant) {
+  if (!CONFIG.scriptUrl) { toast('Connexion requise.', 'error'); return; }
+  toast('⟳ Génération du reçu...', '');
+  try {
+    const params = new URLSearchParams({
+      action:     'genererRecu',
+      commandeId: commandeId,
+      montant:    montant,
+      date:       new Date().toISOString().split('T')[0],
+      type:       'Paiement',
+    });
+    const res  = await fetch(CONFIG.scriptUrl + '?' + params.toString(), { redirect: 'follow' });
+    const data = await res.json();
+    if (data.error) { toast('Erreur : ' + data.error, 'error'); return; }
+    if (data.viewUrl) window.open(data.viewUrl, '_blank');
+    toast('✓ Reçu PDF ouvert !', 'success');
+  } catch(e) { toast('Erreur : ' + e.message, 'error'); }
+}
+
+// ═══════════════════════════════════════════════════════
+//  STATISTIQUES TAILLEURS
+// ═══════════════════════════════════════════════════════
+function renderStatsTailleurs() {
+  const anneeEl = document.getElementById('tailleurAnnee');
+  const filterEl = document.getElementById('tailleurFilter');
+
+  // Peupler les années
+  const annees = [...new Set(DB.interne.map(i => {
+    const d = new Date(i.dateCouture || '');
+    return isNaN(d) ? null : d.getFullYear();
+  }).filter(Boolean))].sort((a,b) => b - a);
+
+  if (!anneeEl.options.length || anneeEl.dataset.filled !== '1') {
+    anneeEl.innerHTML = annees.map(a => `<option value="${a}">${a}</option>`).join('');
+    if (!annees.includes(new Date().getFullYear())) {
+      anneeEl.innerHTML = `<option value="${new Date().getFullYear()}">${new Date().getFullYear()}</option>` + anneeEl.innerHTML;
+    }
+    anneeEl.dataset.filled = '1';
+  }
+
+  const annee   = parseInt(anneeEl.value) || new Date().getFullYear();
+  const filterT = filterEl ? filterEl.value : '';
+
+  // Données de l'année
+  const interneAn = DB.interne.filter(i => {
+    const d = new Date(i.dateCouture || '');
+    return !isNaN(d) && d.getFullYear() === annee;
+  });
+
+  // Calculer stats par tailleur
+  const statsByTailleur = {};
+  interneAn.forEach(i => {
+    const t = i.tailleur || 'Inconnu';
+    if (!statsByTailleur[t]) statsByTailleur[t] = { nom: t, commandes: 0, frais: 0, autresDepenses: 0 };
+    statsByTailleur[t].commandes++;
+    statsByTailleur[t].frais        += parseFloat(i.fraisTailleur)  || 0;
+    statsByTailleur[t].autresDepenses += parseFloat(i.autresDepenses) || 0;
+  });
+
+  // Peupler filtre tailleurs
+  if (filterEl) {
+    const tailleurs = Object.keys(statsByTailleur);
+    filterEl.innerHTML = '<option value="">Tous les tailleurs</option>' +
+      tailleurs.map(t => `<option value="${t}" ${filterEl.value===t?'selected':''}>${t}</option>`).join('');
+  }
+
+  // Couleurs par tailleur
+  const colors = ['var(--gold)', 'var(--sage)', '#5b8dd9', '#d97b5b', '#9b7fd9'];
+  const tailleursArr = Object.values(statsByTailleur);
+  const totalFrais   = tailleursArr.reduce((s, t) => s + t.frais, 0);
+
+  // Cards KPI par tailleur
+  const cardsEl = document.getElementById('tailleursCards');
+  if (!tailleursArr.length) {
+    cardsEl.innerHTML = `<div style="grid-column:1/-1;text-align:center;color:var(--muted);padding:2rem;">Aucune donnée pour ${annee}</div>`;
+  } else {
+    cardsEl.innerHTML = tailleursArr.map((t, i) => {
+      const pct = totalFrais > 0 ? Math.round(t.frais / totalFrais * 100) : 0;
+      const color = colors[i % colors.length];
+      return `<div class="kpi-card" style="border-left:3px solid ${color}">
+        <div class="kpi-label">🧵 ${t.nom}</div>
+        <div style="font-size:1.4rem;font-weight:700;color:${color};margin:6px 0">${t.commandes}</div>
+        <div style="font-size:11px;color:var(--muted)">commandes cousues</div>
+        <div style="margin-top:8px;font-size:12px"><strong>${formatAmount(t.frais)}</strong> en frais</div>
+        <div style="background:var(--surface-2);border-radius:4px;height:6px;margin-top:8px;overflow:hidden">
+          <div style="height:100%;width:${pct}%;background:${color};border-radius:4px;transition:width 0.5s"></div>
+        </div>
+        <div style="font-size:10px;color:var(--muted);margin-top:3px">${pct}% du total</div>
+      </div>`;
+    }).join('');
+  }
+
+  // Tableau détail par semaine
+  const semaines = {};
+  interneAn.forEach(i => {
+    if (!i.dateCouture) return;
+    const d = new Date(i.dateCouture);
+    if (isNaN(d)) return;
+    const { week, year } = getISOWeek(d);
+    const key = year + '-S' + String(week).padStart(2,'0');
+    const tailleur = i.tailleur || 'Inconnu';
+    if (filterT && tailleur !== filterT) return;
+    const k2 = key + '-' + tailleur;
+    if (!semaines[k2]) semaines[k2] = { semaine: key, week, year, tailleur, commandes: 0, frais: 0, autres: 0 };
+    semaines[k2].commandes++;
+    semaines[k2].frais  += parseFloat(i.fraisTailleur)  || 0;
+    semaines[k2].autres += parseFloat(i.autresDepenses) || 0;
+  });
+
+  const rows = Object.values(semaines).sort((a,b) => b.semaine.localeCompare(a.semaine));
+  const tbody = document.getElementById('tailleurDetailBody');
+  if (!rows.length) {
+    tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state"><div class="empty-state-icon">◉</div><div class="empty-state-text">Aucune donnée</div></div></td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = rows.map(r => {
+    const total = r.frais + r.autres;
+    return `<tr>
+      <td style="font-family:var(--font-mono);font-size:11px">${r.semaine}</td>
+      <td><strong>${r.tailleur}</strong></td>
+      <td style="text-align:center">${r.commandes}</td>
+      <td class="amount">${formatAmount(r.frais)}</td>
+      <td class="amount amount-muted">${formatAmount(r.autres)}</td>
+      <td class="amount amount-negative"><strong>${formatAmount(total)}</strong></td>
+      <td><span class="badge badge-solde">Payé</span></td>
+    </tr>`;
+  }).join('');
+}
+
+// ═══════════════════════════════════════════════════════
+//  RAPPORTS MENSUELS
+// ═══════════════════════════════════════════════════════
+function renderRapports() {
+  const anneeEl = document.getElementById('rapportAnnee');
+  const moisEl  = document.getElementById('rapportMois');
+
+  // Peupler les années depuis les paiements
+  const annees = [...new Set(DB.paiements.map(p => {
+    const d = new Date(p.date || '');
+    return isNaN(d) ? null : d.getFullYear();
+  }).filter(Boolean))].sort((a,b) => b-a);
+
+  if (anneeEl && (!anneeEl.options.length || anneeEl.dataset.filled !== '1')) {
+    const currentYear = new Date().getFullYear();
+    const allYears = annees.includes(currentYear) ? annees : [currentYear, ...annees];
+    anneeEl.innerHTML = allYears.map(a => `<option value="${a}">${a}</option>`).join('');
+    anneeEl.dataset.filled = '1';
+  }
+
+  const annee     = parseInt(anneeEl?.value) || new Date().getFullYear();
+  const moisFilter= parseInt(moisEl?.value)  || 0;
+
+  // Regrouper paiements par mois
+  const MOIS_NOMS = ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
+
+  const parMois = {};
+  for (let m = 1; m <= 12; m++) parMois[m] = { recette: 0, depenses: 0, semaines: new Set() };
+
+  DB.paiements.forEach(p => {
+    const d = new Date(p.date || '');
+    if (isNaN(d) || d.getFullYear() !== annee) return;
+    const m = d.getMonth() + 1;
+    if (moisFilter && m !== moisFilter) return;
+    parMois[m].recette += parseFloat(p.montant) || 0;
+    const { week } = getISOWeek(d);
+    parMois[m].semaines.add(week);
+  });
+
+  DB.interne.forEach(i => {
+    const d = new Date(i.dateCouture || '');
+    if (isNaN(d) || d.getFullYear() !== annee) return;
+    const m = d.getMonth() + 1;
+    if (moisFilter && m !== moisFilter) return;
+    parMois[m].depenses += (parseFloat(i.fraisTailleur) || 0) + (parseFloat(i.autresDepenses) || 0);
+  });
+
+  // KPIs annuels
+  const totalRecette  = Object.values(parMois).reduce((s,m) => s + m.recette,  0);
+  const totalDepenses = Object.values(parMois).reduce((s,m) => s + m.depenses, 0);
+  const totalBenefice = totalRecette - totalDepenses;
+
+  document.getElementById('rapportRecetteAnnee').textContent  = formatAmount(totalRecette);
+  document.getElementById('rapportDepensesAnnee').textContent = formatAmount(totalDepenses);
+  const benEl = document.getElementById('rapportBeneficeAnnee');
+  benEl.textContent  = formatAmount(totalBenefice);
+  benEl.style.color  = totalBenefice >= 0 ? 'var(--sage)' : 'var(--rust)';
+
+  // Meilleur mois
+  let meilleurMois = 0, meilleurVal = -Infinity;
+  for (let m = 1; m <= 12; m++) {
+    const ben = parMois[m].recette - parMois[m].depenses;
+    if (parMois[m].recette > 0 && ben > meilleurVal) { meilleurVal = ben; meilleurMois = m; }
+  }
+  document.getElementById('rapportMeilleurMois').textContent = meilleurMois ? MOIS_NOMS[meilleurMois-1] + ' (' + formatAmount(meilleurVal) + ')' : '—';
+
+  // Tableau mensuel
+  const tbodyMois = document.getElementById('rapportMoisBody');
+  const moisAfficher = moisFilter ? [moisFilter] : Array.from({length:12},(_,i)=>i+1);
+  let prevBenefice = null;
+
+  tbodyMois.innerHTML = moisAfficher.map(m => {
+    const d = parMois[m];
+    if (d.recette === 0 && d.depenses === 0) return '';
+    const benefice = d.recette - d.depenses;
+    const tendance = prevBenefice !== null 
+      ? (benefice > prevBenefice ? '<span style="color:var(--sage)">↑ +' + formatAmount(benefice - prevBenefice) + '</span>'
+        : benefice < prevBenefice ? '<span style="color:var(--rust)">↓ ' + formatAmount(benefice - prevBenefice) + '</span>'
+        : '<span style="color:var(--muted)">→ stable</span>')
+      : '<span style="color:var(--muted)">—</span>';
+    prevBenefice = benefice;
+    return `<tr>
+      <td><strong>${MOIS_NOMS[m-1]} ${annee}</strong></td>
+      <td class="amount amount-positive">${formatAmount(d.recette)}</td>
+      <td class="amount amount-negative">${formatAmount(d.depenses)}</td>
+      <td class="amount" style="color:${benefice>=0?'var(--sage)':'var(--rust)'}"><strong>${formatAmount(benefice)}</strong></td>
+      <td style="text-align:center">${d.semaines.size}</td>
+      <td>${tendance}</td>
+    </tr>`;
+  }).filter(Boolean).join('') || `<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:1rem">Aucune donnée pour cette période</td></tr>`;
+
+  // Tableau détail semaines (depuis bilans clôturés)
+  const tbodySem = document.getElementById('rapportSemaineBody');
+  const bilans = DB.bilans.filter(b => {
+    if (parseInt(b.annee) !== annee) return false;
+    if (!moisFilter) return true;
+    // Approximation : semaine → mois
+    const d = new Date(annee, 0, 1 + (b.semaine - 1) * 7);
+    return d.getMonth() + 1 === moisFilter;
+  }).sort((a,b) => b.semaine - a.semaine);
+
+  if (!bilans.length) {
+    tbodySem.innerHTML = `<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:1rem">Aucun bilan clôturé — clôturez des semaines pour voir le détail</td></tr>`;
+  } else {
+    const MOIS_COURTS = ['Jan','Fév','Mar','Avr','Mai','Jun','Jul','Aoû','Sep','Oct','Nov','Déc'];
+    tbodySem.innerHTML = bilans.map(b => {
+      const d = new Date(parseInt(b.annee || annee), 0, 1 + (b.semaine - 1) * 7);
+      const moisNom = MOIS_COURTS[d.getMonth()];
+      const benefice = b.benefice || (b.recette - b.depenses);
+      return `<tr>
+        <td style="font-family:var(--font-mono);font-size:11px">S${b.semaine} / ${b.annee || annee}</td>
+        <td style="font-size:11px;color:var(--muted)">${moisNom}</td>
+        <td class="amount amount-positive">${formatAmount(b.recette)}</td>
+        <td class="amount">${formatAmount(b.depenses * 0.7)}</td>
+        <td class="amount amount-muted">${formatAmount(b.depenses * 0.3)}</td>
+        <td class="amount" style="color:${benefice>=0?'var(--sage)':'var(--rust)'}"><strong>${formatAmount(benefice)}</strong></td>
+        <td style="font-size:11px">${b.dateCloture ? formatDate(b.dateCloture) : '—'}</td>
+      </tr>`;
+    }).join('');
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+//  GÉNÉRATION REÇU CLIENT
+// ═══════════════════════════════════════════════════════
+async function genererRecuClient(commandeId) {
+  if (!CONFIG.scriptUrl) {
+    toast('Connexion Google Sheets requise pour générer un reçu.', 'error');
+    return;
+  }
+
+  const cmd = DB.commandes.find(c => c.id === commandeId);
+  if (!cmd) { toast('Commande introuvable.', 'error'); return; }
+
+  // Afficher modal de confirmation reçu
+  const montantSaisi = prompt(
+    `Reçu pour ${cmd.nomClient}\n` +
+    `Commande : ${cmd.modele}\n` +
+    `Total : ${formatAmount(cmd.prixTotal)}\n` +
+    `Déjà payé : ${formatAmount(cmd.avance)}\n\n` +
+    `Montant de CE paiement (XAF) :`,
+    cmd.avance
+  );
+
+  if (!montantSaisi) return;
+  const montant = parseFloat(montantSaisi) || 0;
+  if (!montant) { toast('Montant invalide.', 'error'); return; }
+
+  toast('⟳ Génération du reçu en cours...', '');
+
+  try {
+    const params = new URLSearchParams({
+      action:      'genererRecu',
+      commandeId:  commandeId,
+      montant:     montant,
+      date:        new Date().toISOString().split('T')[0],
+      type:        montant >= cmd.prixTotal ? 'Solde' : 'Paiement',
+    });
+
+    const res  = await fetch(CONFIG.scriptUrl + '?' + params.toString(), { redirect: 'follow' });
+    const data = await res.json();
+
+    if (data.error) { toast('Erreur reçu : ' + data.error, 'error'); return; }
+
+    // Ouvrir le PDF dans un nouvel onglet
+    if (data.viewUrl) {
+      window.open(data.viewUrl, '_blank');
+      toast('✓ Reçu généré ! PDF ouvert dans un nouvel onglet.', 'success');
+    } else if (data.pdfUrl) {
+      window.open(data.pdfUrl, '_blank');
+      toast('✓ Reçu PDF généré avec succès !', 'success');
+    }
+
+    // Rafraîchir les données
+    await syncFromSheets();
+
+  } catch(e) {
+    toast('Erreur : ' + e.message, 'error');
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+//  SYSTÈME DE MOT DE PASSE
+// ═══════════════════════════════════════════════════════
+
+// Mots de passe
+const PASSWORDS = {
+  admin:   'zele2026',
+  employe: 'mali2026'
+};
+
+let USER_ROLE = null; // 'admin' ou 'employe'
+
+function doLogin() {
+  var pwd = document.getElementById('loginPassword').value.trim();
+  var err = document.getElementById('loginError');
+  
+  if (pwd === 'zele2026') {
+    USER_ROLE = 'admin';
+    showApp();
+  } else if (pwd === 'mali2026') {
+    USER_ROLE = 'employe';
+    showApp();
+  } else {
+    err.style.display = 'block';
+    document.getElementById('loginPassword').value = '';
+    setTimeout(function(){ err.style.display = 'none'; }, 3000);
+  }
+}
+
+function showApp() {
+  document.getElementById('loginScreen').style.display = 'none';
+  document.getElementById('appLayout').style.display   = 'block';
+
+  // Badge role dans le header
+  var roleEl = document.createElement('div');
+  roleEl.style.cssText = 'font-size:11px;color:var(--muted);padding:4px 10px;background:var(--surface-2);border-radius:20px;margin-right:8px;';
+  roleEl.textContent   = USER_ROLE === 'admin' ? 'Admin' : 'Employe';
+  var ha = document.querySelector('.header-actions');
+  if (ha) ha.prepend(roleEl);
+
+  // Charger les donnees
+  loadFromStorage();
+  setDefaultWeek();
+  refreshAll();
+  updateHeaderWeek();
+
+  // Restrictions employe
+  if (USER_ROLE === 'employe') {
+    setTimeout(function(){ applyEmployeRestrictions(); }, 1200);
+  }
+
+  // Auto-sync
+  if (CONFIG.scriptUrl) {
+    setTimeout(function(){ syncFromSheets(); }, 1000);
+  }
+}
+
+function applyEmployeRestrictions() {
+  setTimeout(function() {
+    // Cacher boutons supprimer
+    var btns = document.querySelectorAll('.btn-danger');
+    btns.forEach(function(btn) {
+      var txt = btn.textContent.trim();
+      if (txt === 'X' || txt === '\u2715' || txt === '\u00d7') {
+        btn.style.display = 'none';
+      }
+      if (txt.indexOf('Effacer') !== -1) {
+        btn.style.display = 'none';
+      }
+    });
+
+    // Cacher menu Config
+    var navItems = document.querySelectorAll('.nav-item');
+    navItems.forEach(function(item) {
+      var oc = item.getAttribute('onclick') || '';
+      if (oc.indexOf('config') !== -1) {
+        item.style.display = 'none';
+      }
+    });
+
+    // Cacher bouton Config dans header
+    var configBtns = document.querySelectorAll('.config-btn');
+    configBtns.forEach(function(btn) {
+      if (btn.textContent.indexOf('Configuration') !== -1) {
+        btn.style.display = 'none';
+      }
+    });
+
+    toast('Mode Employe - Ajout autorise uniquement', '');
+  }, 1200);
+}
+
+
+// ═══════════════════════════════════════════════════════
+//  TOASTER
+// ═══════════════════════════════════════════════════════
+function toast(msg, type = '') {
+  const el = document.createElement('div');
+  el.className = 'toast ' + type;
+  el.textContent = msg;
+  document.getElementById('toaster').appendChild(el);
+  setTimeout(() => el.remove(), 3500);
+}
+</script>
+</body>
+</html>
